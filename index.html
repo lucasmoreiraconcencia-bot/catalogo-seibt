@@ -1715,9 +1715,14 @@ body.admin-mode .price-adjust-btn { display: inline-flex; }
       if (saved) {
         const overlay = document.getElementById('loginOverlay');
         if (overlay) {
-          overlay.style.backgroundImage = 'url(' + JSON.stringify(saved) + ')';
+          overlay.style.backgroundImage = 'url(' + saved + ')';
           overlay.style.backgroundSize = 'cover';
           overlay.style.backgroundPosition = 'center';
+        }
+      } else {
+        const overlay = document.getElementById('loginOverlay');
+        if (overlay) {
+          overlay.style.backgroundImage = '';
         }
       }
     } catch(e) {}
@@ -3275,7 +3280,17 @@ function setupRealtimeSync() {
           };
           localStorage.setItem('seibt_projetos_v1', JSON.stringify(PROJETOS_DATA));
         }
-        
+
+        // Atualizar background de login
+        if (newData.loginBg !== undefined) {
+          if (newData.loginBg) {
+            localStorage.setItem('seibt_login_bg_v1', newData.loginBg);
+          } else {
+            localStorage.removeItem('seibt_login_bg_v1');
+          }
+          applyLoginBackground();
+        }
+
         // Re-renderizar a interface
         render();
         console.log('Sincronização concluída');
@@ -3288,6 +3303,31 @@ function setupRealtimeSync() {
 
 // Iniciar sincronização após carregar dados iniciais
 setTimeout(() => setupRealtimeSync(), 1000);
+
+// Realtime para tabela de representantes
+function setupRepresentantesRealtimeSync() {
+  try {
+    db.from('representantes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'representantes'
+      }, async () => {
+        console.log('Representantes atualizados na nuvem — sincronizando...');
+        await fetchRepresentantesFromCloud();
+        // Atualizar grid público se modal estiver aberto
+        const modal = document.getElementById('representantesPublicModal');
+        if (modal && modal.style.display !== 'none') {
+          renderRepPublicGrid();
+        }
+      })
+      .subscribe();
+  } catch(e) {
+    console.warn('Erro ao configurar Realtime de representantes:', e);
+  }
+}
+
+setTimeout(() => setupRepresentantesRealtimeSync(), 1500);
 
 
 // Registrar Service Worker para funcionamento offline
@@ -4950,7 +4990,29 @@ if ('serviceWorker' in navigator) {
   <div style="background:#F4F6F9;border-radius:12px;padding:2rem;width:100%;max-width:900px;margin:2rem auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
       <h2 style="margin:0;color:#1B3A5C;font-size:1.3rem;">🗺️ Nossa Equipe de Representantes</h2>
-      <button onclick="document.getElementById('representantesPublicModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">&times;</button>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button id="repPublicAddBtn" onclick="openRepFormPublic(null)" style="display:none;background:#1B3A5C;color:white;border:none;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:600;">➕ Adicionar</button>
+        <button onclick="document.getElementById('representantesPublicModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">&times;</button>
+      </div>
+    </div>
+    <!-- Formulário inline de edição (Admin) -->
+    <div id="repPublicFormContainer" style="display:none;background:white;border:1px solid #E2E8F0;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;">
+      <h3 id="repPublicFormTitle" style="margin:0 0 1rem;color:#1B3A5C;font-size:1rem;"></h3>
+      <input type="hidden" id="repPublicFormId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">
+        <div><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Nome *</label><input type="text" id="rpfNome" placeholder="Nome completo" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;box-sizing:border-box;"></div>
+        <div><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Região *</label><input type="text" id="rpfRegiao" placeholder="Ex: RIO GRANDE DO SUL" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;box-sizing:border-box;"></div>
+        <div><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Telefone Fixo</label><input type="text" id="rpfTelFixo" placeholder="(XX) XXXX-XXXX" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;box-sizing:border-box;"></div>
+        <div><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Celular</label><input type="text" id="rpfCelular" placeholder="(XX) 9XXXX-XXXX" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;box-sizing:border-box;"></div>
+        <div><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Endereço</label><input type="text" id="rpfEndereco" placeholder="Rua, Número, Cidade - UF" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;box-sizing:border-box;"></div>
+        <div><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">E-mail</label><input type="email" id="rpfEmail" placeholder="email@exemplo.com" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;box-sizing:border-box;"></div>
+      </div>
+      <div style="margin-bottom:0.8rem;"><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Comissão</label><textarea id="rpfComissao" rows="3" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea></div>
+      <div style="margin-bottom:1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Cidades Atendidas</label><textarea id="rpfCidades" rows="3" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea></div>
+      <div style="display:flex;gap:0.5rem;">
+        <button onclick="saveRepFormPublic()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">💾 Salvar</button>
+        <button onclick="document.getElementById('repPublicFormContainer').style.display='none'" style="background:#E2E8F0;color:#333;border:none;padding:0.7rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;">Cancelar</button>
+      </div>
     </div>
     <div id="repPublicGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1.2rem;"></div>
   </div>
@@ -5180,11 +5242,16 @@ async function deleteRep(id) {
 // ---- Public UI ----
 window.openRepresentantesPublic = async function() {
   await fetchRepresentantesFromCloud();
+  // Mostrar botão "Adicionar" apenas para admin
+  const addBtn = document.getElementById('repPublicAddBtn');
+  if (addBtn) addBtn.style.display = (window.CURRENT_USER_DATA && window.CURRENT_USER_DATA.role === 'admin') ? 'inline-block' : 'none';
+  document.getElementById('repPublicFormContainer').style.display = 'none';
   renderRepPublicGrid();
   document.getElementById('representantesPublicModal').style.display = 'flex';
 };
 
 function renderRepPublicGrid() {
+  const isAdmin = window.CURRENT_USER_DATA && window.CURRENT_USER_DATA.role === 'admin';
   const grid = document.getElementById('repPublicGrid');
   if (!REPRESENTANTES_DATA.length) {
     grid.innerHTML = '<p style="color:#6B7B8D;font-style:italic;grid-column:1/-1;text-align:center;padding:2rem;">Informações de representantes em breve.</p>';
@@ -5194,6 +5261,11 @@ function renderRepPublicGrid() {
     const cidades = (r.cidades || '').trim();
     const comissao = (r.comissao || '').trim();
     const comissaoLines = comissao ? comissao.split('\n').map(l => `<div>${escHtml(l)}</div>`).join('') : '—';
+    const adminBtns = isAdmin ? `
+      <div style="display:flex;gap:0.4rem;margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid #E2E8F0;">
+        <button onclick="openRepFormPublic('${r.id}')" style="flex:1;background:#EAF2FB;color:#1B3A5C;border:1px solid #D6E6F5;padding:0.4rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">✏️ Editar</button>
+        <button onclick="deleteRepPublic('${r.id}')" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.4rem 0.7rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">🗑</button>
+      </div>` : '';
     return `
     <div style="background:white;border-radius:10px;border:1px solid #E2E8F0;overflow:hidden;box-shadow:0 2px 8px rgba(27,58,92,0.06);">
       <div style="background:linear-gradient(135deg,#1B3A5C,#2C5F8A);color:white;padding:0.9rem 1.2rem;">
@@ -5216,9 +5288,73 @@ function renderRepPublicGrid() {
             <div style="font-size:0.82rem;color:#334155;line-height:1.6;">${escHtml(cidades)}</div>
           </div>
         </div>` : ''}
+        ${adminBtns}
       </div>
     </div>`;
   }).join('');
+}
+
+function openRepFormPublic(id) {
+  const fc = document.getElementById('repPublicFormContainer');
+  const title = document.getElementById('repPublicFormTitle');
+  const fields = ['rpfNome','rpfRegiao','rpfTelFixo','rpfCelular','rpfEndereco','rpfEmail','rpfComissao','rpfCidades'];
+  if (id) {
+    const rep = REPRESENTANTES_DATA.find(r => r.id === id);
+    if (!rep) return;
+    title.textContent = 'Editar: ' + (rep.nome || '');
+    document.getElementById('repPublicFormId').value = rep.id;
+    document.getElementById('rpfNome').value = rep.nome || '';
+    document.getElementById('rpfRegiao').value = rep.regiao || '';
+    document.getElementById('rpfTelFixo').value = rep.tel_fixo || '';
+    document.getElementById('rpfCelular').value = rep.celular || '';
+    document.getElementById('rpfEndereco').value = rep.endereco || '';
+    document.getElementById('rpfEmail').value = rep.email || '';
+    document.getElementById('rpfComissao').value = rep.comissao || '';
+    document.getElementById('rpfCidades').value = rep.cidades || '';
+  } else {
+    title.textContent = 'Novo Representante';
+    document.getElementById('repPublicFormId').value = '';
+    fields.forEach(f => { document.getElementById(f).value = ''; });
+  }
+  fc.style.display = 'block';
+  fc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function saveRepFormPublic() {
+  const nome = document.getElementById('rpfNome').value.trim();
+  const regiao = document.getElementById('rpfRegiao').value.trim();
+  if (!nome || !regiao) { showToast('Nome e Região são obrigatórios', 'error'); return; }
+  const existingId = document.getElementById('repPublicFormId').value;
+  const rep = {
+    id: existingId || ('rep_' + Date.now()),
+    nome, regiao,
+    tel_fixo:  document.getElementById('rpfTelFixo').value.trim(),
+    celular:   document.getElementById('rpfCelular').value.trim(),
+    endereco:  document.getElementById('rpfEndereco').value.trim(),
+    email:     document.getElementById('rpfEmail').value.trim(),
+    comissao:  document.getElementById('rpfComissao').value.trim(),
+    cidades:   document.getElementById('rpfCidades').value.trim()
+  };
+  if (existingId) {
+    const idx = REPRESENTANTES_DATA.findIndex(r => r.id === existingId);
+    if (idx >= 0) REPRESENTANTES_DATA[idx] = rep; else REPRESENTANTES_DATA.push(rep);
+  } else {
+    REPRESENTANTES_DATA.push(rep);
+  }
+  localStorage.setItem(REP_CACHE_KEY, JSON.stringify(REPRESENTANTES_DATA));
+  await saveRepresentanteToCloud(rep);
+  document.getElementById('repPublicFormContainer').style.display = 'none';
+  renderRepPublicGrid();
+  showToast('Representante salvo!', 'success');
+}
+
+async function deleteRepPublic(id) {
+  if (!confirm('Excluir este representante?')) return;
+  REPRESENTANTES_DATA = REPRESENTANTES_DATA.filter(r => r.id !== id);
+  localStorage.setItem(REP_CACHE_KEY, JSON.stringify(REPRESENTANTES_DATA));
+  await deleteRepresentanteFromCloud(id);
+  renderRepPublicGrid();
+  showToast('Representante excluído.', 'success');
 }
 
 function escHtml(s) {
@@ -5264,18 +5400,19 @@ async function uploadLoginBg() {
 
   statusEl.textContent = 'Processando...';
   try {
-    // Try Supabase Storage first, fallback to base64
     let imageUrl = null;
+
+    // Tentar Supabase Storage primeiro
     try {
       const ext = file.type.includes('png') ? 'png' : 'jpg';
-      const fileName = 'login-bg/login_bg_' + Date.now() + '.' + ext;
+      const fileName = 'login-bg/login_bg.' + ext; // nome fixo para sobrescrever
       const { error: upError } = await db.storage.from('public-assets').upload(fileName, file, { contentType: file.type, upsert: true });
       if (!upError) {
         const { data: urlData } = db.storage.from('public-assets').getPublicUrl(fileName);
-        imageUrl = urlData.publicUrl;
+        imageUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
       }
     } catch(storageErr) {
-      console.log('Storage upload failed, using base64:', storageErr.message);
+      console.log('Storage upload failed, usando base64:', storageErr.message);
     }
 
     // Fallback: base64
@@ -5288,41 +5425,41 @@ async function uploadLoginBg() {
       });
     }
 
+    // Salvar local
     localStorage.setItem('seibt_login_bg_v1', imageUrl);
+    applyLoginBackground();
 
-    // Also save to catalog_data table for persistence
+    // Salvar no catalog_data para propagar via Realtime a todos os usuários
     try {
-      const { data: existing } = await db.from('catalog_data').select('data').eq('id', 'main').single();
-      if (existing) {
+      const { data: existing, error: fetchErr } = await db.from('catalog_data').select('data').eq('id', 'main').single();
+      if (!fetchErr && existing) {
         const payload = existing.data || {};
         payload.loginBg = imageUrl;
         await db.from('catalog_data').update({ data: payload, updated_at: new Date().toISOString() }).eq('id', 'main');
       }
-    } catch(e) {}
+    } catch(e) {
+      console.warn('Falha ao salvar loginBg no cloud:', e.message);
+    }
 
-    applyLoginBackground();
     statusEl.style.color = '#16a34a';
-    statusEl.textContent = '✅ Imagem aplicada com sucesso!';
+    statusEl.textContent = '✅ Imagem aplicada e sincronizada para todos!';
   } catch(e) {
     statusEl.style.color = '#c0392b';
     statusEl.textContent = 'Erro: ' + e.message;
   }
 }
 
-function removeLoginBg() {
+async function removeLoginBg() {
   localStorage.removeItem('seibt_login_bg_v1');
   const overlay = document.getElementById('loginOverlay');
-  if (overlay) {
-    overlay.style.backgroundImage = '';
-  }
+  if (overlay) overlay.style.backgroundImage = '';
   try {
-    db.from('catalog_data').select('data').eq('id', 'main').single().then(({ data: existing }) => {
-      if (existing && existing.data) {
-        const payload = existing.data;
-        delete payload.loginBg;
-        db.from('catalog_data').update({ data: payload, updated_at: new Date().toISOString() }).eq('id', 'main');
-      }
-    });
+    const { data: existing } = await db.from('catalog_data').select('data').eq('id', 'main').single();
+    if (existing && existing.data) {
+      const payload = existing.data;
+      delete payload.loginBg;
+      await db.from('catalog_data').update({ data: payload, updated_at: new Date().toISOString() }).eq('id', 'main');
+    }
   } catch(e) {}
   const statusEl = document.getElementById('loginBgStatus');
   statusEl.style.color = '#6B7B8D';
