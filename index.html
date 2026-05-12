@@ -2870,6 +2870,12 @@ async function loadPhotosFromCloud() {
       };
       localStorage.setItem('seibt_projetos_v1', JSON.stringify(PROJETOS_DATA));
     }
+    // Carregar background de login do cloud
+    if (root.loginBg) {
+      localStorage.setItem('seibt_login_bg_v1', root.loginBg);
+    } else if (root.loginBg === null || root.loginBg === '') {
+      localStorage.removeItem('seibt_login_bg_v1');
+    }
     return true;
   } catch(e) {
     console.log('Sem conexão — usando cache local', e);
@@ -3212,6 +3218,7 @@ loadCurrencyConfig();
 
 // Carregar dados compartilhados da nuvem ao abrir o app
 loadPhotosFromCloud().then(() => {
+  applyLoginBackground(); // Aplicar bg após carregar do cloud
   render();
 });
 
@@ -5398,21 +5405,23 @@ async function uploadLoginBg() {
   const statusEl = document.getElementById('loginBgStatus');
   if (!file) { statusEl.textContent = 'Selecione uma imagem.'; return; }
 
-  statusEl.textContent = 'Processando...';
+  statusEl.textContent = 'Enviando imagem...';
   try {
     let imageUrl = null;
 
-    // Tentar Supabase Storage primeiro
+    // Tentar Supabase Storage primeiro (nome fixo para sobrescrever)
     try {
       const ext = file.type.includes('png') ? 'png' : 'jpg';
-      const fileName = 'login-bg/login_bg.' + ext; // nome fixo para sobrescrever
-      const { error: upError } = await db.storage.from('public-assets').upload(fileName, file, { contentType: file.type, upsert: true });
+      const fileName = 'login-bg/login_bg.' + ext;
+      const { error: upError } = await db.storage
+        .from('public-assets')
+        .upload(fileName, file, { contentType: file.type, upsert: true });
       if (!upError) {
         const { data: urlData } = db.storage.from('public-assets').getPublicUrl(fileName);
-        imageUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
+        imageUrl = urlData.publicUrl; // URL limpa para salvar
       }
     } catch(storageErr) {
-      console.log('Storage upload failed, usando base64:', storageErr.message);
+      console.log('Storage upload falhou, usando base64:', storageErr.message);
     }
 
     // Fallback: base64
@@ -5425,20 +5434,19 @@ async function uploadLoginBg() {
       });
     }
 
-    // Salvar local
+    // Salvar URL limpa no localStorage e aplicar
     localStorage.setItem('seibt_login_bg_v1', imageUrl);
     applyLoginBackground();
 
-    // Salvar no catalog_data para propagar via Realtime a todos os usuários
-    try {
-      const { data: existing, error: fetchErr } = await db.from('catalog_data').select('data').eq('id', 'main').single();
-      if (!fetchErr && existing) {
-        const payload = existing.data || {};
-        payload.loginBg = imageUrl;
-        await db.from('catalog_data').update({ data: payload, updated_at: new Date().toISOString() }).eq('id', 'main');
-      }
-    } catch(e) {
-      console.warn('Falha ao salvar loginBg no cloud:', e.message);
+    // Salvar no catalog_data → dispara Realtime para TODOS os usuários
+    const { data: existing, error: fetchErr } = await db.from('catalog_data').select('data').eq('id', 'main').single();
+    if (!fetchErr && existing) {
+      const payload = existing.data || {};
+      payload.loginBg = imageUrl;
+      const { error: saveErr } = await db.from('catalog_data')
+        .update({ data: payload, updated_at: new Date().toISOString() })
+        .eq('id', 'main');
+      if (saveErr) throw saveErr;
     }
 
     statusEl.style.color = '#16a34a';
@@ -5446,6 +5454,7 @@ async function uploadLoginBg() {
   } catch(e) {
     statusEl.style.color = '#c0392b';
     statusEl.textContent = 'Erro: ' + e.message;
+    console.error('uploadLoginBg error:', e);
   }
 }
 
