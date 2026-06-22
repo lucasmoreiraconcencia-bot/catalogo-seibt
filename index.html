@@ -8486,9 +8486,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
           <div style="font-size:0.75rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">📊 Dados Complementares</div>
-          <button onclick="configurarGoogleSheets()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">⚙ Google Sheets</button>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <button onclick="window.buscarProposta()" style="font-size:0.72rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">🔍 Buscar Proposta</button>
+            <button onclick="configurarGoogleSheets()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">⚙ Google Sheets</button>
+          </div>
         </div>
-        <div id="orc_sheets_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.8rem;min-height:1rem;"></div>
+        <div id="orc_sheets_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.4rem;min-height:1rem;"></div>
+        <div id="orc_pasta_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.8rem;min-height:1rem;"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#166534;text-transform:uppercase;margin-bottom:0.3rem;">Origem</label>
@@ -8776,6 +8780,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (st) st.innerHTML = '<span style="color:#9CA3AF;font-style:italic;">Configure o Google Sheets para gerar o nº automaticamente.</span>';
     }
     _renderItens();
+    if (typeof _atualizarExibicaoPasta === 'function') _atualizarExibicaoPasta();
     setTimeout(function() { var f = modal.querySelector('input'); if (f) f.focus(); }, 150);
   };
 
@@ -9360,9 +9365,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
           <div style="font-size:0.75rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">📊 Dados Complementares</div>
-          <button onclick="configurarGoogleSheetsPen()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">⚙ Google Sheets</button>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <button onclick="window.buscarProposta()" style="font-size:0.72rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">🔍 Buscar Proposta</button>
+            <button onclick="configurarGoogleSheetsPen()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">⚙ Google Sheets</button>
+          </div>
         </div>
-        <div id="orc_pen_sheets_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.8rem;min-height:1rem;"></div>
+        <div id="orc_pen_sheets_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.4rem;min-height:1rem;"></div>
+        <div id="orc_pen_pasta_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.8rem;min-height:1rem;"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#166534;text-transform:uppercase;margin-bottom:0.3rem;">Origem</label>
@@ -9747,6 +9756,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     } else {
       if (st) st.innerHTML = '<span style="color:#9CA3AF;font-style:italic;">Configure o Google Sheets para gerar o nº automaticamente.</span>';
     }
+    if (typeof _atualizarExibicaoPasta === 'function') _atualizarExibicaoPasta();
     setTimeout(function() { var f = modal.querySelector('input'); if (f) f.focus(); }, 150);
   };
 
@@ -10384,6 +10394,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     // Carrega opções do Google Sheets nos selects de Dados Complementares
     _carregarOpcoesMaq();
     _renderCatalogList(''); _renderItens();
+    if (typeof _atualizarExibicaoPasta === 'function') _atualizarExibicaoPasta();
   };
 
   /* ── DADOS COMPLEMENTARES: helpers de select e nº proposta ── */
@@ -11826,9 +11837,13 @@ document.addEventListener('DOMContentLoaded', measureWebVitals);
       <div style="padding:0.8rem;border-bottom:1px solid #E2E8F0;background:#F0FDF4;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
           <div style="font-size:0.69rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.06em;">&#128202; Dados Complementares</div>
-          <button onclick="configurarGoogleSheets()" style="font-size:0.68rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.18rem 0.45rem;cursor:pointer;font-family:inherit;font-weight:600;" title="Configurar Google Sheets">&#9881; Sheets</button>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <button onclick="window.buscarProposta()" style="font-size:0.68rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.18rem 0.45rem;cursor:pointer;font-family:inherit;font-weight:600;">🔍 Buscar</button>
+            <button onclick="configurarGoogleSheets()" style="font-size:0.68rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.18rem 0.45rem;cursor:pointer;font-family:inherit;font-weight:600;" title="Configurar Google Sheets">&#9881; Sheets</button>
+          </div>
         </div>
-        <div id="orc_maq_sheets_status" style="font-size:0.72rem;color:#166534;margin-bottom:0.4rem;min-height:0.9rem;"></div>
+        <div id="orc_maq_sheets_status" style="font-size:0.72rem;color:#166534;margin-bottom:0.2rem;min-height:0.9rem;"></div>
+        <div id="orc_maq_pasta_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.4rem;min-height:0.9rem;"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem;">
           <div>
             <div style="font-size:0.66rem;color:#166534;font-weight:700;text-transform:uppercase;margin-bottom:2px;">Origem</div>
@@ -12106,50 +12121,217 @@ function _fecharReabertura() {
   if (ov) ov.style.display = 'none';
 }
 
-// Salva Word + JSON na mesma pasta escolhida pelo usuário
-// Usa showDirectoryPicker (Chrome/Edge) → um único diálogo de pasta
-// Fallback: dois downloads automáticos para a pasta padrão
-function _baixarPropostaComJson(tipo, mainBlob, nomeBase, ext, data) {
+// ── GERENCIAMENTO DE PASTA DE PROPOSTAS ─────────────────────────────────────
+
+var _pastaPropostaHandle = null; // cache em memória da sessão
+
+function _getHandleDB() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open('seibt_handles_v1', 1);
+    req.onupgradeneeded = function(e) { e.target.result.createObjectStore('handles'); };
+    req.onsuccess = function(e) { resolve(e.target.result); };
+    req.onerror = function() { reject(); };
+  });
+}
+
+async function _salvarPastaHandle(handle) {
+  _pastaPropostaHandle = handle;
+  localStorage.setItem('seibt_pasta_propostas_nome_v1', handle.name);
+  try {
+    var db = await _getHandleDB();
+    var tx = db.transaction('handles', 'readwrite');
+    tx.objectStore('handles').put(handle, 'proposals_dir');
+  } catch(e) {}
+}
+
+async function _obterPastaHandle() {
+  if (_pastaPropostaHandle) return _pastaPropostaHandle;
+  try {
+    var db = await _getHandleDB();
+    _pastaPropostaHandle = await new Promise(function(resolve) {
+      var tx = db.transaction('handles', 'readonly');
+      var req = tx.objectStore('handles').get('proposals_dir');
+      req.onsuccess = function() { resolve(req.result || null); };
+      req.onerror = function() { resolve(null); };
+    });
+    return _pastaPropostaHandle;
+  } catch(e) { return null; }
+}
+
+window.configurarPastaPropostas = async function() {
+  if (!window.showDirectoryPicker) {
+    alert('Abra o catálogo pelo Google Chrome ou Microsoft Edge para usar este recurso.');
+    return;
+  }
+  try {
+    var handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    await _salvarPastaHandle(handle);
+    _atualizarExibicaoPasta();
+    showToast('✅ Pasta configurada: ' + handle.name, 'success');
+  } catch(e) {
+    if (e && e.name !== 'AbortError') showToast('Erro ao configurar pasta: ' + e.message, 'error');
+  }
+};
+
+function _nomePastaConfigurada() {
+  return localStorage.getItem('seibt_pasta_propostas_nome_v1') || '';
+}
+
+function _atualizarExibicaoPasta() {
+  var nome = _nomePastaConfigurada();
+  var html = nome
+    ? '📁 Salvando em: <strong style="color:#15803D;">' + nome + '</strong> &nbsp;<a href="#" onclick="event.preventDefault();window.configurarPastaPropostas()" style="color:#64748B;font-size:0.7rem;text-decoration:none;border-bottom:1px dashed #94A3B8;">alterar pasta</a>'
+    : '⚠️ <strong>Pasta não configurada</strong> — <a href="#" onclick="event.preventDefault();window.configurarPastaPropostas()" style="color:#1B3A5C;font-weight:700;">clique aqui para configurar onde salvar as propostas</a>';
+  ['orc_pasta_status','orc_pen_pasta_status','orc_maq_pasta_status'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+}
+
+function _mostrarSucessoSalvamento(pastaNome, nomeArquivo) {
+  var div = document.createElement('div');
+  div.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:3px solid #16A34A;border-radius:16px;padding:2rem 2.5rem;z-index:999999;font-family:\'DM Sans\',sans-serif;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.35);max-width:480px;width:90%;animation:fadeInScale 0.2s ease;';
+  div.innerHTML =
+    '<div style="font-size:3.5rem;margin-bottom:0.5rem;">✅</div>' +
+    '<div style="font-size:1.4rem;font-weight:700;color:#15803D;margin-bottom:0.7rem;">PROPOSTA SALVA!</div>' +
+    '<div style="font-size:0.95rem;color:#374151;margin-bottom:0.4rem;">📁 Pasta: <strong>' + pastaNome + '</strong></div>' +
+    '<div style="font-size:0.82rem;color:#6B7280;word-break:break-all;background:#F0FDF4;border:1px solid #BBF7D0;padding:0.6rem 0.8rem;border-radius:8px;margin-bottom:1.2rem;">📄 ' + nomeArquivo + '</div>' +
+    '<button onclick="this.parentElement.remove()" style="background:#16A34A;color:white;border:none;padding:0.75rem 2.5rem;border-radius:8px;cursor:pointer;font-family:inherit;font-size:1.05rem;font-weight:700;width:100%;">OK, entendi!</button>';
+  document.body.appendChild(div);
+  setTimeout(function() { if (div.parentNode) div.remove(); }, 8000);
+}
+
+function _registrarLocalArquivo(numero, pasta, nomeArquivo) {
+  try {
+    var locais = JSON.parse(localStorage.getItem('seibt_locais_v1') || '{}');
+    locais[String(numero)] = { pasta: pasta, arquivo: nomeArquivo, ts: new Date().toISOString() };
+    var nums = Object.keys(locais);
+    if (nums.length > 300) { delete locais[nums[0]]; }
+    localStorage.setItem('seibt_locais_v1', JSON.stringify(locais));
+  } catch(e) {}
+}
+
+async function _escreverNoHandle(dirHandle, nome, blob) {
+  var fh = await dirHandle.getFileHandle(nome, { create: true });
+  var w = await fh.createWritable();
+  await w.write(await blob.arrayBuffer());
+  await w.close();
+}
+
+// ── Buscar onde foi salva uma proposta ───────────────────────────────────────
+window.buscarProposta = function(numero) {
+  var nr = String(numero || '').trim();
+  if (!nr) { nr = prompt('Digite o número da proposta (ex: 1120):'); if (!nr) return; nr = nr.trim(); }
+  var html = '';
+
+  // 1. Local registrado automaticamente
+  try {
+    var locais = JSON.parse(localStorage.getItem('seibt_locais_v1') || '{}');
+    var local = locais[nr];
+    if (local) {
+      html += '<div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:10px;padding:1.2rem;margin-bottom:1rem;">' +
+        '<div style="font-weight:700;color:#15803D;font-size:1rem;margin-bottom:0.6rem;">📁 Local encontrado!</div>' +
+        '<div style="margin-bottom:0.3rem;"><strong>Pasta:</strong> ' + local.pasta + '</div>' +
+        '<div style="word-break:break-all;"><strong>Arquivo:</strong> ' + local.arquivo + '</div>' +
+        '<div style="font-size:0.75rem;color:#6B7280;margin-top:0.5rem;">Salvo em: ' + new Date(local.ts).toLocaleString('pt-BR') + '</div>' +
+        '</div>';
+    }
+  } catch(e) {}
+
+  // 2. Histórico de propostas
+  try {
+    var hist = JSON.parse(localStorage.getItem('seibt_proposals_v1') || '[]');
+    var props = hist.filter(function(p){ return String(p.numero_completo||p.numero_base||'').replace(/\s/g,'').indexOf(nr) !== -1; });
+    if (props.length) {
+      html += '<div style="margin-bottom:0.5rem;font-weight:700;color:#1B3A5C;">📋 Dados da proposta:</div>';
+      props.forEach(function(p) {
+        var tipo = p.tipo === 'navalhas' ? 'Navalhas' : p.tipo === 'peneiras' ? 'Peneiras' : 'Máquinas';
+        var dt = p.ts ? new Date(p.ts).toLocaleString('pt-BR') : '—';
+        var nrBase = (p.numero_base||'').split('/')[0].trim();
+        var nomeEsperado = (p.dados && p.dados.cliente ? p.dados.cliente.toUpperCase().replace(/[^A-Z0-9]/g,'_').substring(0,25) : '???') + '_..._' + nrBase + '.docx';
+        html += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1rem;margin-bottom:0.7rem;">' +
+          '<div><strong>Proposta:</strong> ' + (p.numero_completo||p.numero_base) + ' — ' + tipo + '</div>' +
+          '<div><strong>Cliente:</strong> ' + (p.cliente||'—') + '</div>' +
+          '<div><strong>Gerado em:</strong> ' + dt + '</div>' +
+          '<div style="margin-top:0.5rem;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:0.5rem;font-size:0.8rem;"><strong>Pesquise no Windows por:</strong><br><span style="color:#C2410C;font-family:monospace;">' + nrBase + '</span><br><span style="font-size:0.75rem;color:#6B7280;">(pressione Win+S e pesquise esse número)</span></div>' +
+          '</div>';
+      });
+    }
+  } catch(e) {}
+
+  if (!html) {
+    html = '<div style="text-align:center;color:#6B7280;padding:1.5rem;">' +
+      '<div style="font-size:2rem;margin-bottom:0.5rem;">🔍</div>' +
+      '<div>Nenhum registro encontrado para <strong>' + nr + '</strong>.</div>' +
+      '<div style="margin-top:1rem;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:1rem;font-size:0.85rem;text-align:left;">' +
+      '<strong>Dica para encontrar o arquivo:</strong><br>' +
+      '1. Pressione <strong>Win + S</strong> no teclado<br>' +
+      '2. Digite <strong>' + nr + '</strong><br>' +
+      '3. Procure por arquivos .docx ou .pdf com esse número' +
+      '</div></div>';
+  }
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:\'DM Sans\',sans-serif;padding:1rem;';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:14px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">' +
+    '<h3 style="margin:0;color:#1B3A5C;font-size:1.1rem;">🔍 Proposta ' + nr + '</h3>' +
+    '<button onclick="this.closest(\'div[style]\').remove()" style="background:#F1F5F9;border:none;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:1.2rem;">&times;</button>' +
+    '</div>' + html + '</div>';
+  document.body.appendChild(modal);
+};
+
+// ── Salva Word + JSON na pasta configurada (sem diálogo na 2ª vez em diante) ─
+async function _baixarPropostaComJson(tipo, mainBlob, nomeBase, ext, data) {
   try {
     var itensRaw = (tipo === 'navalhas' ? window._orcItens : tipo === 'maquinas' ? window._orcItensMaq : window._orcItensPen) || [];
     var snapshot = {
-      tipo: tipo,
-      numero: data.numero,
-      cliente: data.cliente,
+      tipo: tipo, numero: data.numero, cliente: data.cliente,
       ts: new Date().toISOString(),
-      dados: Object.assign({}, data, {
-        itens_raw: itensRaw.map(function(it){ return Object.assign({}, it); })
-      })
+      dados: Object.assign({}, data, { itens_raw: itensRaw.map(function(it){ return Object.assign({}, it); }) })
     };
     var jsonBlob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
     var nomeMain = nomeBase + ext;
     var nomeJson = nomeBase + '.json';
 
-    if (window.showDirectoryPicker) {
-      window.showDirectoryPicker({ mode: 'readwrite', startIn: 'documents' })
-        .then(function(dirHandle) {
-          // Salva o arquivo principal (Word ou PDF)
-          return dirHandle.getFileHandle(nomeMain, { create: true })
-            .then(function(fh) { return fh.createWritable(); })
-            .then(function(w) { return mainBlob.arrayBuffer().then(function(b){ return w.write(b); }).then(function(){ return w.close(); }); })
-            .then(function() {
-              // Salva o JSON na mesma pasta
-              return dirHandle.getFileHandle(nomeJson, { create: true })
-                .then(function(fh) { return fh.createWritable(); })
-                .then(function(w) { return jsonBlob.arrayBuffer().then(function(b){ return w.write(b); }).then(function(){ return w.close(); }); });
-            })
-            .then(function() {
-              if (typeof showToast === 'function') showToast('✅ Proposta salva: ' + nomeMain + ' + ' + nomeJson, 'success', 4000);
-            });
-        })
-        .catch(function(e) {
-          if (e && e.name === 'AbortError') return; // usuário cancelou
-          // Fallback se der erro inesperado
-          _baixarBlobFallback(mainBlob, nomeMain);
-          setTimeout(function(){ _baixarBlobFallback(jsonBlob, nomeJson); }, 600);
-        });
-    } else {
-      // Navegador sem suporte a showDirectoryPicker — baixa os dois arquivos sequencialmente
+    if (!window.showDirectoryPicker) {
+      // Navegador sem suporte (Firefox) — baixa normal
+      _baixarBlobFallback(mainBlob, nomeMain);
+      setTimeout(function(){ _baixarBlobFallback(jsonBlob, nomeJson); }, 600);
+      return;
+    }
+
+    // Tenta usar a pasta já configurada
+    var dirHandle = await _obterPastaHandle();
+    if (dirHandle) {
+      try {
+        var perm = await dirHandle.requestPermission({ mode: 'readwrite' });
+        if (perm === 'granted') {
+          await _escreverNoHandle(dirHandle, nomeMain, mainBlob);
+          await _escreverNoHandle(dirHandle, nomeJson, jsonBlob);
+          _registrarLocalArquivo(data.numero, dirHandle.name, nomeMain);
+          _mostrarSucessoSalvamento(dirHandle.name, nomeMain);
+          return;
+        }
+      } catch(permErr) {
+        // handle inválido ou negado — cai no picker
+        _pastaPropostaHandle = null;
+      }
+    }
+
+    // Sem pasta configurada ou handle inválido → pede ao usuário escolher
+    try {
+      var newHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      await _salvarPastaHandle(newHandle);
+      _atualizarExibicaoPasta();
+      await _escreverNoHandle(newHandle, nomeMain, mainBlob);
+      await _escreverNoHandle(newHandle, nomeJson, jsonBlob);
+      _registrarLocalArquivo(data.numero, newHandle.name, nomeMain);
+      _mostrarSucessoSalvamento(newHandle.name, nomeMain);
+    } catch(e) {
+      if (e && e.name === 'AbortError') return;
       _baixarBlobFallback(mainBlob, nomeMain);
       setTimeout(function(){ _baixarBlobFallback(jsonBlob, nomeJson); }, 600);
     }
