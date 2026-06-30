@@ -12346,8 +12346,8 @@ function _baixarBlobFallback(blob, nome) {
   setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
 }
 
-// Lê o .json selecionado e popula o modal
-function _onProposalFileSelected(input, tipo) {
+// Lê o .json selecionado e popula o modal correto
+function _onProposalFileSelected(input, tipoHint) {
   var file = input.files && input.files[0];
   if (!file) return;
   var reader = new FileReader();
@@ -12355,16 +12355,23 @@ function _onProposalFileSelected(input, tipo) {
     try {
       var snap = JSON.parse(e.target.result);
       if (!snap || !snap.dados) { alert('Arquivo inválido. Selecione um arquivo .json gerado pelo catálogo SEIBT.'); return; }
-      snap.tipo = tipo;
+      // Usa o tipo registrado no próprio arquivo JSON — o parâmetro tipoHint é só fallback
+      var tipoValido = snap.tipo === 'navalhas' || snap.tipo === 'peneiras' || snap.tipo === 'maquinas';
+      snap.tipo = tipoValido ? snap.tipo : tipoHint;
+      var tipo = snap.tipo;
       snap.id = snap.id || ('prop_file_' + Date.now());
       var parsed = _extractNumeroBase(snap.numero || snap.dados.numero || '');
       snap.numero_base = parsed.base;
       snap.numero_completo = snap.numero || snap.dados.numero || '';
       snap.cliente = snap.cliente || snap.dados.cliente || '';
-      // Abre o modal se ainda não estiver aberto
+      // Fecha todos os modais de orçamento antes de abrir o correto
+      ['orcamentoNavalhasModal','orcamentoPeneirasModal','orcamentoMaquinasModal'].forEach(function(id) {
+        var m = document.getElementById(id); if (m) m.style.display = 'none';
+      });
+      // Abre o modal correto para o tipo do arquivo
       var modalId = tipo === 'navalhas' ? 'orcamentoNavalhasModal' : tipo === 'maquinas' ? 'orcamentoMaquinasModal' : 'orcamentoPeneirasModal';
       var modal = document.getElementById(modalId);
-      if (modal && modal.style.display !== 'flex') modal.style.display = 'flex';
+      if (modal) modal.style.display = 'flex';
       // Carrega os dados no modal
       _carregarProposta(snap);
     } catch(err) {
