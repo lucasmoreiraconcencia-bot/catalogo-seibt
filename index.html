@@ -8561,9 +8561,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
               &#x1F4C4; Word Document (.docx)
             </button>
             <button onclick="document.getElementById('orc_export_menu').style.display='none';gerarOrcamentoDocx('pdf')"
-              style="width:100%;padding:0.75rem 1rem;background:none;border:none;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;display:flex;align-items:center;gap:0.6rem;"
+              style="width:100%;padding:0.75rem 1rem;background:none;border:none;border-bottom:1px solid #F1F5F9;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;display:flex;align-items:center;gap:0.6rem;"
               onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
               &#x1F4D1; PDF
+            </button>
+            <button onclick="document.getElementById('orc_export_menu').style.display='none';window.configurarPastaPropostas()"
+              style="width:100%;padding:0.65rem 1rem;background:#F8FAFC;border:none;text-align:left;cursor:pointer;font-family:inherit;font-size:0.82rem;display:flex;align-items:center;gap:0.6rem;color:#374151;border-top:1px solid #E2E8F0;"
+              onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#F8FAFC'">
+              &#x1F4C1; Escolher pasta de destino
             </button>
           </div>
         </div>
@@ -9424,9 +9429,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
               &#x1F4C4; Word Document (.docx)
             </button>
             <button onclick="document.getElementById('orc_pen_export_menu').style.display='none';gerarOrcamentoPeneirasDocx('pdf')"
-              style="width:100%;padding:0.75rem 1rem;background:none;border:none;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;display:flex;align-items:center;gap:0.6rem;"
+              style="width:100%;padding:0.75rem 1rem;background:none;border:none;border-bottom:1px solid #F1F5F9;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;display:flex;align-items:center;gap:0.6rem;"
               onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">
               &#x1F4D1; PDF
+            </button>
+            <button onclick="document.getElementById('orc_pen_export_menu').style.display='none';window.configurarPastaPropostas()"
+              style="width:100%;padding:0.65rem 1rem;background:#F8FAFC;border:none;text-align:left;cursor:pointer;font-family:inherit;font-size:0.82rem;display:flex;align-items:center;gap:0.6rem;color:#374151;border-top:1px solid #E2E8F0;"
+              onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#F8FAFC'">
+              &#x1F4C1; Escolher pasta de destino
             </button>
           </div>
         </div>
@@ -11775,8 +11785,11 @@ document.addEventListener('DOMContentLoaded', measureWebVitals);
             style="width:100%;padding:0.75rem 1rem;background:none;border:none;border-bottom:1px solid #F1F5F9;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;"
             onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">&#128196; Word (.docx)</button>
           <button onclick="document.getElementById('orc_maq_export_menu').style.display='none';gerarOrcamentoMaquinasDocx('pdf')"
-            style="width:100%;padding:0.75rem 1rem;background:none;border:none;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;"
+            style="width:100%;padding:0.75rem 1rem;background:none;border:none;border-bottom:1px solid #F1F5F9;text-align:left;cursor:pointer;font-family:inherit;font-size:0.88rem;"
             onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='none'">&#128209; PDF</button>
+          <button onclick="document.getElementById('orc_maq_export_menu').style.display='none';window.configurarPastaPropostas()"
+            style="width:100%;padding:0.65rem 1rem;background:#F8FAFC;border:none;text-align:left;cursor:pointer;font-family:inherit;font-size:0.82rem;color:#374151;border-top:1px solid #E2E8F0;"
+            onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#F8FAFC'">&#x1F4C1; Escolher pasta de destino</button>
         </div>
       </div>
       <button onclick="document.getElementById('orcamentoMaquinasModal').style.display='none'"
@@ -12179,9 +12192,25 @@ function _nomePastaConfigurada() {
 
 function _atualizarExibicaoPasta() {
   var nome = _nomePastaConfigurada();
-  var html = nome
-    ? '📁 Salvando em: <strong style="color:#15803D;">' + nome + '</strong> &nbsp;<a href="#" onclick="event.preventDefault();window.configurarPastaPropostas()" style="color:#64748B;font-size:0.7rem;text-decoration:none;border-bottom:1px dashed #94A3B8;">alterar pasta</a>'
-    : '⚠️ <strong>Pasta não configurada</strong> — <a href="#" onclick="event.preventDefault();window.configurarPastaPropostas()" style="color:#1B3A5C;font-weight:700;">clique aqui para configurar onde salvar as propostas</a>';
+  var suporte = !!window.showDirectoryPicker;
+  var html;
+  if (!suporte) {
+    html = '<div style="display:flex;align-items:center;gap:0.5rem;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:0.45rem 0.75rem;">' +
+      '<span style="font-size:0.8rem;color:#92400E;">⚠️ Seu navegador não suporta seleção de pasta. Use Chrome ou Edge para salvar na pasta escolhida.</span>' +
+      '</div>';
+  } else if (nome) {
+    html = '<div style="display:flex;align-items:center;gap:0.6rem;background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:7px;padding:0.45rem 0.8rem;">' +
+      '<span style="font-size:1rem;">📁</span>' +
+      '<span style="font-size:0.82rem;color:#15803D;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + nome + '">Salvando em: <strong>' + nome + '</strong></span>' +
+      '<button onclick="window.configurarPastaPropostas()" style="flex-shrink:0;font-size:0.72rem;color:#166534;background:white;border:1px solid #86EFAC;border-radius:5px;padding:0.2rem 0.6rem;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;">✏️ Alterar pasta</button>' +
+      '</div>';
+  } else {
+    html = '<div style="display:flex;align-items:center;gap:0.6rem;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:7px;padding:0.45rem 0.8rem;">' +
+      '<span style="font-size:1rem;">📂</span>' +
+      '<span style="font-size:0.82rem;color:#991B1B;font-weight:600;flex:1;">Pasta de destino não configurada</span>' +
+      '<button onclick="window.configurarPastaPropostas()" style="flex-shrink:0;font-size:0.78rem;color:white;background:#DC2626;border:none;border-radius:5px;padding:0.25rem 0.75rem;cursor:pointer;font-family:inherit;font-weight:700;white-space:nowrap;">📁 Escolher pasta</button>' +
+      '</div>';
+  }
   ['orc_pasta_status','orc_pen_pasta_status','orc_maq_pasta_status'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = html;
