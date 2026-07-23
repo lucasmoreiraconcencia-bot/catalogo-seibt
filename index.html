@@ -8717,8 +8717,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var vR = ov.valor_rot  !== undefined ? ov.valor_rot  : (nav.valor_rot  || 0);
     var cF = (nav.cod_fixa && String(nav.cod_fixa).trim() !== '/' && String(nav.cod_fixa).trim() !== '') ? String(nav.cod_fixa) : '';
     var cR = (nav.cod_rot  && String(nav.cod_rot).trim()  !== '/' && String(nav.cod_rot).trim()  !== '') ? String(nav.cod_rot)  : '';
-    if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR1 = ov.descricao || nav.descricao || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs1 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs1.forEach(function(c){ _itens.push({ descricao: _dR1, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-    if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF1 = ov.descricao || nav.descricao || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs1 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs1.forEach(function(c){ _itens.push({ descricao: _dF1, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    var _rotB1 = ov.descricao || nav.descricao || ('NAVALHA ROTORA ' + nav.modelo.trim());
+    var _fixB1 = ov.descricao ? ov.descricao.replace(/\bROTORA\b/i,'FIXA') : (nav.descricao ? nav.descricao.replace(/\bROTORA\b/i,'FIXA') : ('NAVALHA FIXA ' + nav.modelo.trim()));
+    if (parseFloat(nav.qtde_rot) > 0) { var _cRs1 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR1 = _cRs1.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs1.forEach(function(c,i){ _itens.push({ descricao: _rotB1 + (_sufR1[i]||''), cod: c, qtd: nav.qtde_rot, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    if (parseFloat(nav.qtde_fixa) > 0) { var _cFs1 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs1.forEach(function(c){ _itens.push({ descricao: _fixB1, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
     var panel = document.getElementById('orc_modelo_selector');
     if (panel) panel.style.display = 'none';
     _renderItens();
@@ -8759,8 +8761,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       }
       if (nav) {
         var _ov2 = isNewNav ? {} : ((window.EXTRA_OVERRIDES && window.EXTRA_OVERRIDES.navalhas || {})['nav_' + navIdx] || {});
-        if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR2 = _ov2.descricao || nav.descricao || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs2 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs2.forEach(function(c){ _itens.push({ descricao: _dR2, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-        if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF2 = _ov2.descricao || nav.descricao || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs2 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs2.forEach(function(c){ _itens.push({ descricao: _dF2, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+        var _rotB2 = _ov2.descricao || nav.descricao || ('NAVALHA ROTORA ' + nav.modelo.trim());
+        var _fixB2 = _ov2.descricao ? _ov2.descricao.replace(/\bROTORA\b/i,'FIXA') : (nav.descricao ? nav.descricao.replace(/\bROTORA\b/i,'FIXA') : ('NAVALHA FIXA ' + nav.modelo.trim()));
+        if (parseFloat(nav.qtde_rot) > 0) { var _cRs2 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR2 = _cRs2.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs2.forEach(function(c,i){ _itens.push({ descricao: _rotB2 + (_sufR2[i]||''), cod: c, qtd: nav.qtde_rot, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
+        if (parseFloat(nav.qtde_fixa) > 0) { var _cFs2 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs2.forEach(function(c){ _itens.push({ descricao: _fixB2, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
         var qR = parseInt(nav.qtde_rot)||0, qF = parseInt(nav.qtde_fixa)||0;
         if (qR > 0 && qF > 0) obsText = 'OBS: 01 JOGO E COMPOSTO POR ' + qR + ' NAVALHAS ROTORAS E ' + qF + ' FIXAS';
       }
@@ -9699,8 +9703,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var vR   = ov.valor_rot  !== undefined ? ov.valor_rot  : (nav.valor_rot  || 0);
     var cF   = (nav.cod_fixa && String(nav.cod_fixa).trim() !== '/' && String(nav.cod_fixa).trim() !== '') ? String(nav.cod_fixa) : '';
     var cR   = (nav.cod_rot  && String(nav.cod_rot).trim()  !== '/' && String(nav.cod_rot).trim()  !== '') ? String(nav.cod_rot)  : '';
-    if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR3 = ov.descricao || nav.descricao || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs3 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs3.forEach(function(c){ _itens.push({ descricao: _dR3, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-    if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF3 = ov.descricao || nav.descricao || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs3 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs3.forEach(function(c){ _itens.push({ descricao: _dF3, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    var _rotB3 = ov.descricao || nav.descricao || ('NAVALHA ROTORA ' + nav.modelo.trim());
+    var _fixB3 = ov.descricao ? ov.descricao.replace(/\bROTORA\b/i,'FIXA') : (nav.descricao ? nav.descricao.replace(/\bROTORA\b/i,'FIXA') : ('NAVALHA FIXA ' + nav.modelo.trim()));
+    if (parseFloat(nav.qtde_rot) > 0) { var _cRs3 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR3 = _cRs3.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs3.forEach(function(c,i){ _itens.push({ descricao: _rotB3 + (_sufR3[i]||''), cod: c, qtd: nav.qtde_rot, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    if (parseFloat(nav.qtde_fixa) > 0) { var _cFs3 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs3.forEach(function(c){ _itens.push({ descricao: _fixB3, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
     var panel = document.getElementById('orc_pen_nav_selector');
     if (panel) panel.style.display = 'none';
     _renderItensPen();
@@ -11086,10 +11092,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (tipo==='rot') {
       var _tituloRot = ov.descricao || nav.descricao || ('NAVALHA ROTORA '+nav.modelo);
       var cods=(nav.cod_rot||'').split('/').map(function(c){return c.trim();}).filter(Boolean);
-      if (cods.length>1) { cods.forEach(function(cod){ window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloRot+' - CÓD: '+cod,descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:1,valor_unit:nav.valor_rot||0,ipi:5.20}); }); }
+      var _sufR4 = cods.length >= 2 ? [' ESQ',' DIR'] : [''];
+      if (cods.length>1) { cods.forEach(function(cod,i){ window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloRot+(_sufR4[i]||'')+' - CÓD: '+cod,descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:1,valor_unit:nav.valor_rot||0,ipi:5.20}); }); }
       else { window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloRot+' - CÓD: '+(nav.cod_rot||''),descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:nav.qtde_rot||1,valor_unit:nav.valor_rot||0,ipi:5.20}); }
     } else {
-      var _tituloFixa = ov.descricao || nav.descricao || ('NAVALHA FIXA '+nav.modelo);
+      var _tituloFixa = ov.descricao ? ov.descricao.replace(/\bROTORA\b/i,'FIXA') : (nav.descricao ? nav.descricao.replace(/\bROTORA\b/i,'FIXA') : ('NAVALHA FIXA '+nav.modelo));
       window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloFixa+' - CÓD: '+(nav.cod_fixa||''),descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:nav.qtde_fixa||1,valor_unit:nav.valor_fixa||0,ipi:5.20});
     }
     flashFeedback();
