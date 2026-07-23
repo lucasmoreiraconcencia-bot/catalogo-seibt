@@ -8717,8 +8717,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var vR = ov.valor_rot  !== undefined ? ov.valor_rot  : (nav.valor_rot  || 0);
     var cF = (nav.cod_fixa && String(nav.cod_fixa).trim() !== '/' && String(nav.cod_fixa).trim() !== '') ? String(nav.cod_fixa) : '';
     var cR = (nav.cod_rot  && String(nav.cod_rot).trim()  !== '/' && String(nav.cod_rot).trim()  !== '') ? String(nav.cod_rot)  : '';
-    if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR1 = ov.desc_rot  || nav.desc_rot  || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs1 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs1.forEach(function(c){ _itens.push({ descricao: _dR1, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-    if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF1 = ov.desc_fixa || nav.desc_fixa || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs1 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs1.forEach(function(c){ _itens.push({ descricao: _dF1, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR1 = ov.descricao || nav.descricao || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs1 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs1.forEach(function(c){ _itens.push({ descricao: _dR1, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF1 = ov.descricao || nav.descricao || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs1 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs1.forEach(function(c){ _itens.push({ descricao: _dF1, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
     var panel = document.getElementById('orc_modelo_selector');
     if (panel) panel.style.display = 'none';
     _renderItens();
@@ -8759,8 +8759,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       }
       if (nav) {
         var _ov2 = isNewNav ? {} : ((window.EXTRA_OVERRIDES && window.EXTRA_OVERRIDES.navalhas || {})['nav_' + navIdx] || {});
-        if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR2 = _ov2.desc_rot  || nav.desc_rot  || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs2 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs2.forEach(function(c){ _itens.push({ descricao: _dR2, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-        if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF2 = _ov2.desc_fixa || nav.desc_fixa || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs2 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs2.forEach(function(c){ _itens.push({ descricao: _dF2, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+        if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR2 = _ov2.descricao || nav.descricao || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs2 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs2.forEach(function(c){ _itens.push({ descricao: _dR2, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
+        if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF2 = _ov2.descricao || nav.descricao || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs2 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs2.forEach(function(c){ _itens.push({ descricao: _dF2, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
         var qR = parseInt(nav.qtde_rot)||0, qF = parseInt(nav.qtde_fixa)||0;
         if (qR > 0 && qF > 0) obsText = 'OBS: 01 JOGO E COMPOSTO POR ' + qR + ' NAVALHAS ROTORAS E ' + qF + ' FIXAS';
       }
@@ -9699,8 +9699,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var vR   = ov.valor_rot  !== undefined ? ov.valor_rot  : (nav.valor_rot  || 0);
     var cF   = (nav.cod_fixa && String(nav.cod_fixa).trim() !== '/' && String(nav.cod_fixa).trim() !== '') ? String(nav.cod_fixa) : '';
     var cR   = (nav.cod_rot  && String(nav.cod_rot).trim()  !== '/' && String(nav.cod_rot).trim()  !== '') ? String(nav.cod_rot)  : '';
-    if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR3 = ov.desc_rot  || nav.desc_rot  || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs3 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs3.forEach(function(c){ _itens.push({ descricao: _dR3, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-    if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF3 = ov.desc_fixa || nav.desc_fixa || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs3 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs3.forEach(function(c){ _itens.push({ descricao: _dF3, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    if (nav.qtde_rot  && nav.qtde_rot  !== '/' && vR) { var _dR3 = ov.descricao || nav.descricao || ('NAVALHA ROTORA '  + nav.modelo.trim()); var _cRs3 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cRs3.forEach(function(c){ _itens.push({ descricao: _dR3, cod: c, qtd: nav.qtde_rot,  valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
+    if (nav.qtde_fixa && nav.qtde_fixa !== '/' && vF) { var _dF3 = ov.descricao || nav.descricao || ('NAVALHA FIXA '    + nav.modelo.trim()); var _cFs3 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs3.forEach(function(c){ _itens.push({ descricao: _dF3, cod: c, qtd: nav.qtde_fixa, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
     var panel = document.getElementById('orc_pen_nav_selector');
     if (panel) panel.style.display = 'none';
     _renderItensPen();
@@ -11084,12 +11084,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var EO = window.EXTRA_OVERRIDES || (typeof EXTRA_OVERRIDES!=='undefined'?EXTRA_OVERRIDES:{});
     var ov = ((EO.navalhas||{})['nav_'+idx])||{};
     if (tipo==='rot') {
-      var _tituloRot = ov.desc_rot || nav.desc_rot || ('NAVALHA ROTORA '+nav.modelo);
+      var _tituloRot = ov.descricao || nav.descricao || ('NAVALHA ROTORA '+nav.modelo);
       var cods=(nav.cod_rot||'').split('/').map(function(c){return c.trim();}).filter(Boolean);
       if (cods.length>1) { cods.forEach(function(cod){ window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloRot+' - CÓD: '+cod,descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:1,valor_unit:nav.valor_rot||0,ipi:5.20}); }); }
       else { window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloRot+' - CÓD: '+(nav.cod_rot||''),descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:nav.qtde_rot||1,valor_unit:nav.valor_rot||0,ipi:5.20}); }
     } else {
-      var _tituloFixa = ov.desc_fixa || nav.desc_fixa || ('NAVALHA FIXA '+nav.modelo);
+      var _tituloFixa = ov.descricao || nav.descricao || ('NAVALHA FIXA '+nav.modelo);
       window._pickerAddItem&&window._pickerAddItem({tipo:'maquina',titulo:_tituloFixa+' - CÓD: '+(nav.cod_fixa||''),descricao:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA.',qtd:nav.qtde_fixa||1,valor_unit:nav.valor_fixa||0,ipi:5.20});
     }
     flashFeedback();
@@ -11219,10 +11219,6 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <div class="inline-edit-label">Valor Unit. Fixa (R$)</div>
         <input id="ienav_valor_fixa" class="inline-edit-input" type="number" min="0" step="0.01" placeholder="593.00">
       </div>
-      <div style="grid-column:1/-1">
-        <div class="inline-edit-label" style="display:flex;align-items:center;gap:0.4rem;">Descrição no Orçamento — Fixa <span style="font-size:0.68rem;color:#9CA3AF;font-weight:400;">(deixe vazio para usar o padrão)</span></div>
-        <textarea id="ienav_desc_fixa" class="inline-edit-input" rows="2" placeholder="Ex: NAVALHA FIXA SEIBT MGHS 300 — AÇO HSS" style="resize:vertical;font-size:0.85rem;"></textarea>
-      </div>
       <div class="inline-edit-section-label">Navalha Rotora</div>
       <div>
         <div class="inline-edit-label">Código Rotora</div>
@@ -11236,9 +11232,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <div class="inline-edit-label">Valor Unit. Rotora (R$)</div>
         <input id="ienav_valor_rot" class="inline-edit-input" type="number" min="0" step="0.01" placeholder="664.00">
       </div>
-      <div style="grid-column:1/-1">
-        <div class="inline-edit-label" style="display:flex;align-items:center;gap:0.4rem;">Descrição no Orçamento — Rotora <span style="font-size:0.68rem;color:#9CA3AF;font-weight:400;">(deixe vazio para usar o padrão)</span></div>
-        <textarea id="ienav_desc_rot" class="inline-edit-input" rows="2" placeholder="Ex: NAVALHA ROTORA SEIBT MGHS 300 — AÇOS ESPECIAIS" style="resize:vertical;font-size:0.85rem;"></textarea>
+      <div style="grid-column:1/-1;margin-top:0.4rem;">
+        <div class="inline-edit-label">Descrição no Orçamento</div>
+        <textarea id="ienav_descricao" class="inline-edit-input" rows="2" style="resize:vertical;font-size:0.85rem;" placeholder="Ex: NAVALHA ROTORA SEIBT MGHS 300"></textarea>
       </div>
     </div>
     <div class="inline-edit-footer">
@@ -11321,7 +11317,7 @@ function openAddNavalhaModal() {
   _ieNavIdx = null; _ieNavIsNew = true; _ieNavNewId = null;
   document.getElementById('ienav_title').textContent = '+ Nova Navalha';
   document.getElementById('ienav_title').style.color = '#7C3AED';
-  ['ienav_modelo','ienav_cod_fixa','ienav_qtde_fixa','ienav_valor_fixa','ienav_desc_fixa','ienav_cod_rot','ienav_qtde_rot','ienav_valor_rot','ienav_desc_rot'].forEach(function(id){ document.getElementById(id).value = ''; });
+  ['ienav_modelo','ienav_cod_fixa','ienav_qtde_fixa','ienav_valor_fixa','ienav_cod_rot','ienav_qtde_rot','ienav_valor_rot','ienav_descricao'].forEach(function(id){ document.getElementById(id).value = ''; });
   var ov = document.getElementById('inlineEditNavalhaOverlay');
   ov.classList.add('active');
   setTimeout(function(){ document.getElementById('ienav_modelo').focus(); }, 100);
@@ -11363,15 +11359,15 @@ function openInlineEditNavalha(idx) {
   var _navLbl = (ov.modelo !== undefined ? ov.modelo : n.modelo) || '';
   document.getElementById('ienav_title').textContent = 'Editar Navalha' + (_navLbl ? ' — ' + _navLbl : '');
   document.getElementById('ienav_title').style.color = '';
-  document.getElementById('ienav_modelo').value    = ov.modelo    !== undefined ? ov.modelo    : (n.modelo    || '');
+  var _navModelo = ov.modelo !== undefined ? ov.modelo : (n.modelo || '');
+  document.getElementById('ienav_modelo').value    = _navModelo;
   document.getElementById('ienav_cod_fixa').value  = ov.cod_fixa  !== undefined ? ov.cod_fixa  : (n.cod_fixa  || '');
   document.getElementById('ienav_qtde_fixa').value = ov.qtde_fixa !== undefined ? ov.qtde_fixa : (n.qtde_fixa || '');
   document.getElementById('ienav_valor_fixa').value= ov.valor_fixa!== undefined ? ov.valor_fixa: (n.valor_fixa|| '');
-  document.getElementById('ienav_desc_fixa').value = ov.desc_fixa !== undefined ? ov.desc_fixa : (n.desc_fixa || '');
   document.getElementById('ienav_cod_rot').value   = ov.cod_rot   !== undefined ? ov.cod_rot   : (n.cod_rot   || '');
   document.getElementById('ienav_qtde_rot').value  = ov.qtde_rot  !== undefined ? ov.qtde_rot  : (n.qtde_rot  || '');
   document.getElementById('ienav_valor_rot').value = ov.valor_rot !== undefined ? ov.valor_rot : (n.valor_rot || '');
-  document.getElementById('ienav_desc_rot').value  = ov.desc_rot  !== undefined ? ov.desc_rot  : (n.desc_rot  || '');
+  document.getElementById('ienav_descricao').value = ov.descricao !== undefined ? ov.descricao : (n.descricao || ('NAVALHA ROTORA ' + _navModelo.trim()));
   var overlay = document.getElementById('inlineEditNavalhaOverlay');
   overlay.classList.add('active');
   if (typeof trapFocus === 'function') trapFocus(overlay);
@@ -11389,11 +11385,10 @@ function saveInlineEditNavalha() {
   var codFixa   = document.getElementById('ienav_cod_fixa').value.trim();
   var qtdeFixa  = document.getElementById('ienav_qtde_fixa').value;
   var valorFixa = document.getElementById('ienav_valor_fixa').value;
-  var descFixa  = document.getElementById('ienav_desc_fixa').value.trim();
   var codRot    = document.getElementById('ienav_cod_rot').value.trim();
   var qtdeRot   = document.getElementById('ienav_qtde_rot').value;
   var valorRot  = document.getElementById('ienav_valor_rot').value;
-  var descRot   = document.getElementById('ienav_desc_rot').value.trim();
+  var descricao = document.getElementById('ienav_descricao').value.trim();
   var btnNav = document.querySelector('#inlineEditNavalhaOverlay .inline-edit-btn-save');
 
   if (_ieNavIsNew) {
@@ -11405,10 +11400,9 @@ function saveInlineEditNavalha() {
       modelo: modelo.toUpperCase(),
       cod_fixa: codFixa, qtde_fixa: qtdeFixa !== '' ? Number(qtdeFixa) : 0,
       valor_fixa: valorFixa !== '' ? parseFloat(valorFixa) : 0,
-      desc_fixa: descFixa,
       cod_rot: codRot, qtde_rot: qtdeRot !== '' ? Number(qtdeRot) : 0,
       valor_rot: valorRot !== '' ? parseFloat(valorRot) : 0,
-      desc_rot: descRot
+      descricao: descricao
     });
     localStorage.setItem('seibt_extra_overrides_v1', JSON.stringify(EXTRA_OVERRIDES));
     closeInlineEditNavalha(); renderNavalhas();
@@ -11424,10 +11418,9 @@ function saveInlineEditNavalha() {
       if (modelo) item.modelo = modelo.toUpperCase();
       item.cod_fixa = codFixa; item.qtde_fixa = qtdeFixa !== '' ? Number(qtdeFixa) : 0;
       item.valor_fixa = valorFixa !== '' ? parseFloat(valorFixa) : 0;
-      item.desc_fixa = descFixa;
       item.cod_rot = codRot; item.qtde_rot = qtdeRot !== '' ? Number(qtdeRot) : 0;
       item.valor_rot = valorRot !== '' ? parseFloat(valorRot) : 0;
-      item.desc_rot = descRot;
+      item.descricao = descricao;
     }
     localStorage.setItem('seibt_extra_overrides_v1', JSON.stringify(EXTRA_OVERRIDES));
     closeInlineEditNavalha(); renderNavalhas();
@@ -11446,11 +11439,10 @@ function saveInlineEditNavalha() {
   if (codFixa)   ov.cod_fixa  = codFixa;   else delete ov.cod_fixa;
   if (qtdeFixa !== '')  ov.qtde_fixa = Number(qtdeFixa);  else delete ov.qtde_fixa;
   if (valorFixa !== '') ov.valor_fixa= parseFloat(valorFixa); else delete ov.valor_fixa;
-  if (descFixa)  ov.desc_fixa = descFixa;  else delete ov.desc_fixa;
   if (codRot)    ov.cod_rot   = codRot;    else delete ov.cod_rot;
   if (qtdeRot !== '')   ov.qtde_rot  = Number(qtdeRot);   else delete ov.qtde_rot;
   if (valorRot !== '')  ov.valor_rot = parseFloat(valorRot); else delete ov.valor_rot;
-  if (descRot)   ov.desc_rot  = descRot;   else delete ov.desc_rot;
+  if (descricao) ov.descricao = descricao; else delete ov.descricao;
   localStorage.setItem('seibt_extra_overrides_v1', JSON.stringify(EXTRA_OVERRIDES));
   closeInlineEditNavalha(); renderNavalhas();
   setBtnLoading(btnNav, true, 'Salvando...');
