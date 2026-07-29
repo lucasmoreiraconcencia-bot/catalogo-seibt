@@ -8045,24 +8045,43 @@ async function resetItemEdit() {
 
     try {
       window._orcItens = [];
-      var nav = (typeof NAVALHAS !== 'undefined') ? NAVALHAS[navIdx] : null;
+      var isNewNavOld = (typeof navIdx === 'string' && String(navIdx).indexOf('nav_new_') === 0);
+      var EO_old = (typeof EXTRA_OVERRIDES !== 'undefined') ? EXTRA_OVERRIDES : {};
+      var nav, ov_old, valorFixa, valorRot, codFixa, codRot, qtdeRot, qtdeFixa;
+      if (isNewNavOld) {
+        nav = (EO_old._newNavalhas || []).find(function(x){ return x._id === navIdx; });
+        if (nav) {
+          ov_old = {}; valorFixa = nav.valor_fixa || 0; valorRot = nav.valor_rot || 0;
+          codFixa = nav.cod_fixa || ''; codRot = nav.cod_rot || '';
+          qtdeRot = parseFloat(nav.qtde_rot || 0); qtdeFixa = parseFloat(nav.qtde_fixa || 0);
+        }
+      } else {
+        nav = (typeof NAVALHAS !== 'undefined') ? NAVALHAS[navIdx] : null;
+        if (nav) {
+          var key_old = 'nav_' + navIdx;
+          ov_old = (EO_old.navalhas) ? (EO_old.navalhas[key_old] || {}) : {};
+          valorFixa = ov_old.valor_fixa !== undefined ? ov_old.valor_fixa : (nav.valor_fixa || 0);
+          valorRot  = ov_old.valor_rot  !== undefined ? ov_old.valor_rot  : (nav.valor_rot  || 0);
+          codFixa = (nav.cod_fixa && nav.cod_fixa !== '/') ? nav.cod_fixa : '';
+          codRot  = (nav.cod_rot  && nav.cod_rot  !== '/') ? nav.cod_rot  : '';
+          qtdeRot  = ov_old.qtde_rot  !== undefined ? parseFloat(ov_old.qtde_rot)  : parseFloat(nav.qtde_rot  || 0);
+          qtdeFixa = ov_old.qtde_fixa !== undefined ? parseFloat(ov_old.qtde_fixa) : parseFloat(nav.qtde_fixa || 0);
+        }
+      }
       if (nav) {
-        var key = 'nav_' + navIdx;
-        var ov = (typeof EXTRA_OVERRIDES !== 'undefined' && EXTRA_OVERRIDES.navalhas) ? (EXTRA_OVERRIDES.navalhas[key] || {}) : {};
-        var valorFixa = ov.valor_fixa !== undefined ? ov.valor_fixa : (nav.valor_fixa || 0);
-        var valorRot  = ov.valor_rot  !== undefined ? ov.valor_rot  : (nav.valor_rot  || 0);
-        var codFixa = (nav.cod_fixa && nav.cod_fixa !== '/') ? nav.cod_fixa : '';
-        var codRot  = (nav.cod_rot  && nav.cod_rot  !== '/') ? nav.cod_rot  : '';
-        if (nav.qtde_rot && nav.qtde_rot !== '/' && valorRot) {
+        var descRot  = (ov_old && ov_old.descricao) ? ov_old.descricao : (nav.descricao || ('NAVALHA ROTORA ' + nav.modelo.trim()));
+        var descFixa = (ov_old && ov_old.descricao) ? ov_old.descricao.replace(/\bROTORA\b/i,'FIXA') : (nav.descricao ? nav.descricao.replace(/\bROTORA\b/i,'FIXA') : ('NAVALHA FIXA ' + nav.modelo.trim()));
+        if (qtdeRot > 0) {
           var codsRot = codRot ? codRot.split('/').map(function(s){return s.trim();}).filter(Boolean) : [''];
-          codsRot.forEach(function(cod) {
-            window._orcItens.push({ descricao: 'NAVALHA ROTORA ' + nav.modelo.trim() + (cod ? ' – CÓD: ' + cod : '') + '\nAS NAVALHAS SÃO FATURADAS (NF) POR PEÇA', qtd: nav.qtde_rot, valor_unit: valorRot, ipi: 5.20 });
+          var sufRot = codsRot.length >= 2 ? [' ESQ',' DIR'] : [''];
+          codsRot.forEach(function(cod, i) {
+            window._orcItens.push({ descricao: descRot + (sufRot[i]||'') + '\nAS NAVALHAS SÃO FATURADAS (NF) POR PEÇA', cod: cod, qtd: qtdeRot, valor_unit: valorRot, ipi: 5.20 });
           });
         }
-        if (nav.qtde_fixa && nav.qtde_fixa !== '/' && valorFixa) {
+        if (qtdeFixa > 0) {
           var codsFixa = codFixa ? codFixa.split('/').map(function(s){return s.trim();}).filter(Boolean) : [''];
           codsFixa.forEach(function(cod) {
-            window._orcItens.push({ descricao: 'NAVALHA FIXA ' + nav.modelo.trim() + (cod ? ' – CÓD: ' + cod : '') + '\nAS NAVALHAS SÃO FATURADAS (NF) POR PEÇA', qtd: nav.qtde_fixa, valor_unit: valorFixa, ipi: 5.20 });
+            window._orcItens.push({ descricao: descFixa + '\nAS NAVALHAS SÃO FATURADAS (NF) POR PEÇA', cod: cod, qtd: qtdeFixa, valor_unit: valorFixa, ipi: 5.20 });
           });
         }
       }
