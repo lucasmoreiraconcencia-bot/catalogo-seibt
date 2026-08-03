@@ -2673,6 +2673,35 @@ let DOLLAR_RATE = 4.80;
 let DOLLAR_TODAY = null;
 const CURRENCY_CACHE_KEY = 'seibt_currency_config_v1';
 
+/* ── Idioma do Orçamento ── */
+window._orcLang = 'PT';
+var _ORC_LANG_DEFAULTS = {
+  PT: { pagamento: '21 dias DDL.', prazo: '5 dias da confirmação do pedido', frete: 'Por conta do comprador.', validade: '5 dias' },
+  EN: { pagamento: '30 days net.', prazo: '5 working days from order confirmation.', frete: "Buyer's responsibility.", validade: '5 days' },
+  ES: { pagamento: '30 días neto.', prazo: '5 días hábiles desde la confirmación del pedido.', frete: 'A cargo del comprador.', validade: '5 días' }
+};
+window.setOrcLang = function(lang) {
+  window._orcLang = lang;
+  ['PT','EN','ES'].forEach(function(l) {
+    ['orc_lang_','orc_pen_lang_','orc_maq_lang_'].forEach(function(pfx) {
+      var b = document.getElementById(pfx + l.toLowerCase());
+      if (!b) return;
+      var active = l === lang;
+      b.style.background = active ? 'white' : 'rgba(255,255,255,0.15)';
+      b.style.color = active ? 'var(--navy)' : 'white';
+      b.style.fontWeight = active ? '700' : '500';
+    });
+  });
+  var d = _ORC_LANG_DEFAULTS[lang] || _ORC_LANG_DEFAULTS.PT;
+  var ids = ['orc_pagamento','orc_prazo','orc_frete','orc_validade',
+             'orc_pen_pagamento','orc_pen_prazo','orc_pen_frete','orc_pen_validade',
+             'orc_maq_pagamento','orc_maq_prazo','orc_maq_frete','orc_maq_validade'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = d[id.split('_').pop()] || d[id.replace(/orc_(?:pen_|maq_)?/,'')] || '';
+  });
+};
+
 let MACHINES = [
   {"modelo": "MGHS 200 LR", "descricao": "2 CV C/ GAVETA", "valor_maq": 40907, "valor_p220": 13017, "valor_p380": 0, "linha": "LR", "imagem": "https://via.placeholder.com/400x200?text=Exemplo+Foto"},
   {"modelo": "MGHS 200 LR", "descricao": "2 CV C/ VCS E CICLONETE", "valor_maq": 47136, "valor_p220": 14361, "valor_p380": 0, "linha": "LR", "imagem": ""},
@@ -8092,10 +8121,7 @@ async function resetItemEdit() {
       setVal('orc_data', todayBR());
       setVal('orc_vendedor', (window.CURRENT_USER_DATA && window.CURRENT_USER_DATA.full_name) ? window.CURRENT_USER_DATA.full_name : '');
       ['orc_numero','orc_cliente','orc_cidade','orc_estado','orc_atencao','orc_fone','orc_cc','orc_email'].forEach(function(id) { setVal(id, ''); });
-      setVal('orc_pagamento', '21 dias DDL.');
-      setVal('orc_prazo', '5 dias da confirmação do pedido');
-      setVal('orc_frete', 'Por conta do comprador.');
-      setVal('orc_validade', '5 dias');
+      if (typeof window.setOrcLang === 'function') window.setOrcLang(window._orcLang || 'PT');
     } catch(e) {}
 
     try { renderItens(); } catch(e) {}
@@ -8296,21 +8322,34 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     return '<w:tr><w:trPr><w:trHeight w:val="'+height+'" w:hRule="atLeast"/></w:trPr>'+(obsText?tcObs(7259,obsText):tcE(7259))+tcE(787)+tcE(1418)+tcE(992)+tcE(1276)+'</w:tr>';
   }
 
+  var _FILL_LABELS = {
+    PT: { proposta:'PROPOSTA Nº:', data:'DATA:', cliente:'CLIENTE:', cidade:'CIDADE:', estado:'ESTADO:',
+          atencao:'AT. :', fone:'FONE:', fatur:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA',
+          ipiLbl:'TOTAL IPI ', cur:'R$' },
+    EN: { proposta:'PROPOSAL No.:', data:'DATE:', cliente:'CUSTOMER:', cidade:'CITY:', estado:'STATE/COUNTRY:',
+          atencao:'ATTN.:', fone:'PHONE:', fatur:'BLADES ARE INVOICED PER PIECE',
+          ipiLbl:'TOTAL TAX ', cur:'USD' },
+    ES: { proposta:'PROPUESTA N°:', data:'FECHA:', cliente:'CLIENTE:', cidade:'CIUDAD:', estado:'ESTADO/PAÍS:',
+          atencao:'ATN.:', fone:'TEL.:', fatur:'LAS CUCHILLAS SON FACTURADAS POR PIEZA',
+          ipiLbl:'TOTAL IMP. ', cur:'USD' }
+  };
+
   function fillXml(xml, data) {
-    xml = xml.replace(/PROPOSTA Nº: \/2026   /, 'PROPOSTA Nº: '+escXml(data.numero)+'   ');
-    xml = xml.replace(/DATA: 21\/01\/\/2026/, 'DATA: '+escXml(data.data));
-    xml = xml.replace(/(<w:t[^>]*>)CLIENTE: (<\/w:t>)/, '$1CLIENTE: '+escXml(data.cliente)+'$2');
-    xml = xml.replace(/(<w:t[^>]*>)CIDADE: (<\/w:t>)/, '$1CIDADE: '+escXml(data.cidade)+'$2');
-    xml = xml.replace(/(<w:t[^>]*>)ESTADO: (<\/w:t>)/, '$1ESTADO: '+escXml(data.estado)+'$2');
-    xml = xml.replace(/(<w:t[^>]*>)AT\. : (<\/w:t>)/, '$1AT. : '+escXml(data.atencao)+'$2');
-    xml = xml.replace(/(<w:t[^>]*>)FONE: (<\/w:t>)/, '$1FONE: '+escXml(data.fone)+'$2');
+    var L = _FILL_LABELS[data.lang] || _FILL_LABELS.PT;
+    xml = xml.replace(/PROPOSTA Nº: \/2026   /, L.proposta+' '+escXml(data.numero)+'   ');
+    xml = xml.replace(/DATA: 21\/01\/\/2026/, L.data+' '+escXml(data.data));
+    xml = xml.replace(/(<w:t[^>]*>)CLIENTE: (<\/w:t>)/, '$1'+L.cliente+' '+escXml(data.cliente)+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)CIDADE: (<\/w:t>)/, '$1'+L.cidade+' '+escXml(data.cidade)+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)ESTADO: (<\/w:t>)/, '$1'+L.estado+' '+escXml(data.estado)+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)AT\. : (<\/w:t>)/, '$1'+L.atencao+' '+escXml(data.atencao)+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)FONE: (<\/w:t>)/, '$1'+L.fone+' '+escXml(data.fone)+'$2');
     xml = xml.replace(/(<w:t[^>]*>)C\/C:            (<\/w:t>)/, '$1C/C: '+escXml(data.cc||'')+'$2');
     xml = xml.replace(/(<w:t[^>]*>)E-MAIL: (<\/w:t>)/, '$1E-MAIL: '+escXml(data.email)+'$2');
     // Product rows
     var hasSpecial = !!(data.obs || data.hasFatur);
     var lastIdx = data.itens.length - 1;
     var rows = data.itens.map(function(it, i){ return mkItemRow(it, hasSpecial && i === lastIdx); }).join('');
-    if (data.hasFatur) rows += mkSpecialRow('AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA', 'CC0000', null);
+    if (data.hasFatur) rows += mkSpecialRow(L.fatur, 'CC0000', null);
     // Spacer: preenche a área de produtos até ~3377 twips (mesma altura do placeholder original).
     // O texto de OBS (se houver) é injetado no topo da célula descrição do spacer,
     // ocupando o espaço expandido e mantendo os totais ancorados no fim da página 1.
@@ -8337,10 +8376,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     // Inject "TOTAL IPI R$" label into IPI row (label cell has empty run after SUBTOTAL row)
     xml = xml.replace(
       /(SUBTOTAL[\s\S]*?<\/w:tr>[\s\S]*?<\/w:rPr>)(<\/w:r>)/,
-      '$1<w:t xml:space="preserve">TOTAL IPI </w:t></w:r>' +
+      '$1<w:t xml:space="preserve">'+L.ipiLbl+'</w:t></w:r>' +
       '<w:r><w:rPr><w:rFonts w:cs="Arial" w:ascii="Arial" w:hAnsi="Arial"/><w:b/>' +
       '<w:sz w:val="20"/><w:szCs w:val="20"/><w:vertAlign w:val="subscript"/></w:rPr>' +
-      '<w:t>R$</w:t></w:r>'
+      '<w:t>'+L.cur+'</w:t></w:r>'
     );
     // Subtotal/Total values
     var vals = [fmtNum(data.subtotal), fmtNum(data.ipiTotal||0), '00,00', fmtNum(data.total)];
@@ -8382,6 +8421,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <span style="font-weight:700;font-size:1rem;">Gerar Orçamento — Navalhas</span>
       </div>
       <div style="display:flex;align-items:center;gap:0.5rem;">
+        <button id="orc_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:var(--navy);border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">🇧🇷 PT</button>
+        <button id="orc_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇺🇸 EN</button>
+        <button id="orc_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇦🇷 ES</button>
+        <div style="width:1px;height:20px;background:rgba(255,255,255,0.3);margin:0 0.2rem;"></div>
         <button onclick="closeOrcamentoModal()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&times;</button>
       </div>
     </div>
@@ -8951,7 +8994,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       return;
     }
     if (st) st.innerHTML = '⏳ Buscando nº da proposta...';
-    window._gasJsonp('nextNum', {}, function(d) {
+    var _navAba = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
+    window._gasJsonp('nextNum', { aba: _navAba }, function(d) {
       if (d && d.nrProposta) {
         _setVal('orc_numero', d.nrProposta);
         if (st) st.innerHTML = '🔄 Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
@@ -8976,7 +9020,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var modelo = data.itens.length > 0 ? (data.itens[0].descricao || '') : '';
     var descricao = data.itens.map(function(it){ return it.descricao + (it.cod ? ' COD.' + it.cod : ''); }).join('; ');
     var rep = data.representante || data.vendedor || '';
+    var _isExport = (data.lang && data.lang !== 'PT');
     var payload = JSON.stringify({
+      aba:             _isExport ? 'BD_EXPORT' : 'BD_PROP',
       nrProposta:      data.numero      || '',
       origem:          data.origem      || '',
       dataAbertura:    data.data        || '',
@@ -8993,7 +9039,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       modelo:          (data.modelo_crm || modelo).substring(0, 100),
       versao:          data.versao_crm  || '',
       descricao:       descricao.substring(0, 500),
-      receitaEstimada: (function(v){ var n = parseFloat(String(v||0).replace(/[^\d.,\-]/g,'').replace(',','.')); if(isNaN(n)) return 'R$ 0,00'; return 'R$ ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace(/\.(\d{2})$/, ',$1'); })(data.total),
+      receitaEstimada: (function(v){ var n = parseFloat(String(v||0).replace(/[^\d.,\-]/g,'').replace(',','.')); if(isNaN(n)) return 'R$ 0,00'; return (_isExport ? 'USD ' : 'R$ ') + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace(/\.(\d{2})$/, ',$1'); })(data.total),
       emailContato:    data.email       || '',
       nomeContato:     data.atencao     || ''
     });
@@ -9035,7 +9081,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (_gUrl) {
         var _gSt = document.getElementById('orc_sheets_status');
         if (_gSt) _gSt.innerHTML = '⏳ Reservando número...';
-        window._gasJsonp('nextNum', {}, function(d) {
+        var _navAba2 = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
+        window._gasJsonp('nextNum', { aba: _navAba2 }, function(d) {
             if (d && d.nrProposta) { _confirmarNumeroLocal(d.nrProposta); _setVal('orc_numero', d.nrProposta); }
             else { var f = _gerarNumeroLocal(); _confirmarNumeroLocal(f); _setVal('orc_numero', f); }
             window._orcNrFinalizado = true;
@@ -9070,14 +9117,25 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       classificacao:  _gv('orc_classificacao'),
       modelo_crm:     _gv('orc_modelo'),
       versao_crm:     _gv('orc_versao'),
+      lang: window._orcLang || 'PT',
       itens: window._orcItens.map(function(it) {
+        var vUnit = parseFloat(it.valor_unit)||0;
+        var lang = window._orcLang || 'PT';
+        if (lang !== 'PT' && vUnit > 0) vUnit = Math.round((vUnit / (window.DOLLAR_RATE||4.80)) * 100) / 100;
         return {
           descricao: it.descricao||'', cod: it.cod||'',
-          qtd: parseFloat(it.qtd)||0, valor_unit: parseFloat(it.valor_unit)||0,
+          qtd: parseFloat(it.qtd)||0, valor_unit: vUnit,
           ipi: parseFloat(it.ipi)||0, total: _calcTotal(it), readonly: !!it.readonly
         };
       })
     };
+    if (data.lang !== 'PT') {
+      data.itens = data.itens.map(function(it) {
+        var base = it.valor_unit * it.qtd * (1 - (it.desconto||0)/100);
+        var ipiAmt = base * (it.ipi||0) / 100;
+        return Object.assign({}, it, { total: Math.round((base + ipiAmt)*100)/100 });
+      });
+    }
     if (!data.cliente) { alert('Preencha o nome do cliente.'); return; }
     var subtotal = data.itens.reduce(function(s, it) { return s + _calcSubTotal(it); }, 0);
     var ipiTotal = data.itens.reduce(function(s, it) { return s + _calcIpiAmount(it); }, 0);
@@ -9275,6 +9333,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <span style="font-weight:700;font-size:1rem;">Gerar Orçamento — Peneiras</span>
       </div>
       <div style="display:flex;align-items:center;gap:0.5rem;">
+        <button id="orc_pen_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:var(--navy);border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">🇧🇷 PT</button>
+        <button id="orc_pen_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇺🇸 EN</button>
+        <button id="orc_pen_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇦🇷 ES</button>
+        <div style="width:1px;height:20px;background:rgba(255,255,255,0.3);margin:0 0.2rem;"></div>
         <button onclick="closeOrcamentoPeneiras()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&times;</button>
       </div>
     </div>
@@ -9754,10 +9816,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     _setValP('orc_pen_data', _hoje());
     _setValP('orc_pen_vendedor', (window.CURRENT_USER_DATA && window.CURRENT_USER_DATA.full_name) ? window.CURRENT_USER_DATA.full_name : '');
     ['orc_pen_numero','orc_pen_cliente','orc_pen_cidade','orc_pen_estado','orc_pen_atencao','orc_pen_fone','orc_pen_cc','orc_pen_email'].forEach(function(id) { _setValP(id, ''); });
-    _setValP('orc_pen_pagamento', '21 dias DDL.');
-    _setValP('orc_pen_prazo', '5 dias da confirmacao do pedido');
-    _setValP('orc_pen_frete', 'Por conta do cliente');
-    _setValP('orc_pen_validade', '5 dias');
+    if (typeof window.setOrcLang === 'function') window.setOrcLang(window._orcLang || 'PT');
     _setValP('orc_pen_obs', '');
     ['orc_pen_origem','orc_pen_ecliente','orc_pen_representante','orc_pen_interno','orc_pen_tipomercado','orc_pen_classificacao','orc_pen_modelo','orc_pen_versao'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
     _renderItensPen();
@@ -9826,7 +9885,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var url = _getSheetsUrl();
     if (!url) { var nr = _gerarNrLocalPen(); _setValP('orc_pen_numero', nr); if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> gerado localmente'; return; }
     if (st) st.innerHTML = '⏳ Buscando nº da proposta...';
-    window._gasJsonp('nextNum', {}, function(d) {
+    var _penAba = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
+    window._gasJsonp('nextNum', { aba: _penAba }, function(d) {
       if (d && d.nrProposta) {
         _setValP('orc_pen_numero', d.nrProposta);
         if (st) st.innerHTML = '🔄 Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
@@ -9928,7 +9988,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (_gUrlP) {
         var _gStP = document.getElementById('orc_pen_sheets_status');
         if (_gStP) _gStP.innerHTML = '⏳ Reservando número...';
-        window._gasJsonp('nextNum', {}, function(d) {
+        var _penAba2 = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
+        window._gasJsonp('nextNum', { aba: _penAba2 }, function(d) {
             if (d && d.nrProposta) { _confirmarNrLocalPen(d.nrProposta); _setValP('orc_pen_numero', d.nrProposta); }
             else { var f = _gerarNrLocalPen(); _confirmarNrLocalPen(f); _setValP('orc_pen_numero', f); }
             window._orcPenNrFinalizado = true;
@@ -9963,10 +10024,20 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       classificacao:  _gvP('orc_pen_classificacao'),
       modelo_crm:     _gvP('orc_pen_modelo'),
       versao_crm:     _gvP('orc_pen_versao'),
+      lang: window._orcLang || 'PT',
       itens: window._orcItensPen.map(function(it) {
-        return { descricao: it.descricao || '', cod: it.cod || '', qtd: parseFloat(it.qtd) || 0, valor_unit: parseFloat(it.valor_unit) || 0, ipi: parseFloat(it.ipi) || 0, total: _calcTotalPen(it), readonly: !!it.readonly };
+        var vUnit = parseFloat(it.valor_unit) || 0;
+        var lang = window._orcLang || 'PT';
+        if (lang !== 'PT' && vUnit > 0) vUnit = Math.round((vUnit / (window.DOLLAR_RATE||4.80)) * 100) / 100;
+        return { descricao: it.descricao || '', cod: it.cod || '', qtd: parseFloat(it.qtd) || 0, valor_unit: vUnit, ipi: parseFloat(it.ipi) || 0, total: _calcTotalPen(it), readonly: !!it.readonly };
       })
     };
+    if (data.lang !== 'PT') {
+      data.itens = data.itens.map(function(it) {
+        var base = it.valor_unit * it.qtd * (1 - (it.desconto||0)/100);
+        return Object.assign({}, it, { total: Math.round((base + base*(it.ipi||0)/100)*100)/100 });
+      });
+    }
     if (!data.cliente) { alert('Preencha o nome do cliente.'); return; }
     var subtotal = data.itens.reduce(function(s, it) { return s + _calcSubTotalPen(it); }, 0);
     var ipiTotal = data.itens.reduce(function(s, it) { return s + _calcIpiAmountPen(it); }, 0);
@@ -10106,6 +10177,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
 
   function fillXmlPen(xml, data) {
+    var _pl = data.lang || 'PT';
+    var _pipiLbl = _pl === 'EN' ? 'TOTAL TAX ' : _pl === 'ES' ? 'TOTAL IMP. ' : 'TOTAL IPI ';
+    var _pCur    = _pl !== 'PT' ? 'USD' : 'R$';
     var endereco = (data.cidade||'') + (data.estado ? ', '+data.estado : '');
 
     // Helper: inject a value into the empty <w:p> of the cell immediately after the label cell.
@@ -10157,10 +10231,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       /(SUBTOTAL[\s\S]*?<\/w:tr>[\s\S]*?<\/w:rPr>)(<\/w:pPr><\/w:p>)/,
       '$1</w:pPr>' +
       '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/>' +
-      '<w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">TOTAL IPI </w:t></w:r>' +
+      '<w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">'+_pipiLbl+'</w:t></w:r>' +
       '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/>' +
       '<w:sz w:val="20"/><w:szCs w:val="20"/><w:vertAlign w:val="subscript"/></w:rPr>' +
-      '<w:t>R$</w:t></w:r></w:p>'
+      '<w:t>'+_pCur+'</w:t></w:r></w:p>'
     );
     var vals = [fmtNum(data.subtotal), fmtNum(data.ipiTotal||0), '0,00', fmtNum(data.total)];
     var vi = 0;
@@ -10429,6 +10503,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     modal.style.display = 'flex';
     window._orcMaqNrFinalizado = false;
+    if (typeof window.setOrcLang === 'function') window.setOrcLang(window._orcLang || 'PT');
     var dateEl = document.getElementById('orc_maq_data'); if (dateEl && !dateEl.value) dateEl.value = todayBR();
     // Nº proposta: fica '---' até o usuário selecionar Versão nos Dados Complementares
     var numEl = document.getElementById('orc_maq_numero');
@@ -10457,7 +10532,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       return;
     }
     if (stEl) stEl.innerHTML = 'Buscando n&#186;...';
-    window._gasJsonp('nextNum', {}, function(d) {
+    var _maqAba = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
+    window._gasJsonp('nextNum', { aba: _maqAba }, function(d) {
       if (d && d.nrProposta) {
         if (numEl && (!numEl.value || numEl.value === '---')) numEl.value = d.nrProposta;
         if (window._confirmarNumeroLocal) window._confirmarNumeroLocal(d.nrProposta);
@@ -10539,7 +10615,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       var url = window._getSheetsUrl ? window._getSheetsUrl() : null;
       if (url) {
         var stEl = document.getElementById('orc_maq_sheets_status'); if (stEl) stEl.innerHTML = 'Reservando nr...';
-        window._gasJsonp('nextNum', {}, function(d) {
+        var _maqAba2 = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
+        window._gasJsonp('nextNum', { aba: _maqAba2 }, function(d) {
           if (d && d.nrProposta) { document.getElementById('orc_maq_numero').value = d.nrProposta; if (window._confirmarNumeroLocal) window._confirmarNumeroLocal(d.nrProposta); }
           else { var f = window._gerarNumeroLocal ? window._gerarNumeroLocal() : '---'; document.getElementById('orc_maq_numero').value = f; if (window._confirmarNumeroLocal) window._confirmarNumeroLocal(f); }
           window._orcMaqNrFinalizado = true;
@@ -10558,7 +10635,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       }
     }
     // ── Fim Guard Máquinas ────────────────────────────────────────────────────
-    var data = { numero: gv('orc_maq_numero'), data: gv('orc_maq_data') || todayBR(), cliente: gv('orc_maq_cliente'), cidade: gv('orc_maq_cidade'), estado: gv('orc_maq_estado'), atencao: gv('orc_maq_atencao'), fone: gv('orc_maq_fone'), email: gv('orc_maq_email'), cc: gv('orc_maq_cc'), pagamento: gv('orc_maq_pagamento'), prazo: gv('orc_maq_prazo'), frete: gv('orc_maq_frete'), validade: gv('orc_maq_validade'), vendedor: gv('orc_maq_vendedor'), obs: gv('orc_maq_obs'), segmento: gv('orc_maq_segmento'), produto: gv('orc_maq_produto'), material: gv('orc_maq_material'), dimensoes: gv('orc_maq_dimensoes'), granulometria: gv('orc_maq_granulometria'), moagem_seco: gv('orc_maq_moagem_seco'), forma_abastecimento: gv('orc_maq_forma_abastecimento'), producao_horaria: gv('orc_maq_producao_horaria'), voltagem: gv('orc_maq_voltagem'), origem: gv('orc_maq_origem'), eCliente: gv('orc_maq_ecliente'), representante: gv('orc_maq_representante'), interno: gv('orc_maq_interno'), tipoMercado: gv('orc_maq_tipomercado'), classificacao: gv('orc_maq_classificacao'), modelo_crm: gv('orc_maq_modelo'), versao_crm: gv('orc_maq_versao'), itens: _itens.map(function(it){ return Object.assign({}, it); }) };
+    var _maqLang = window._orcLang || 'PT';
+    var _maqRate = window.DOLLAR_RATE || 4.80;
+    var data = { numero: gv('orc_maq_numero'), data: gv('orc_maq_data') || todayBR(), cliente: gv('orc_maq_cliente'), cidade: gv('orc_maq_cidade'), estado: gv('orc_maq_estado'), atencao: gv('orc_maq_atencao'), fone: gv('orc_maq_fone'), email: gv('orc_maq_email'), cc: gv('orc_maq_cc'), pagamento: gv('orc_maq_pagamento'), prazo: gv('orc_maq_prazo'), frete: gv('orc_maq_frete'), validade: gv('orc_maq_validade'), vendedor: gv('orc_maq_vendedor'), obs: gv('orc_maq_obs'), segmento: gv('orc_maq_segmento'), produto: gv('orc_maq_produto'), material: gv('orc_maq_material'), dimensoes: gv('orc_maq_dimensoes'), granulometria: gv('orc_maq_granulometria'), moagem_seco: gv('orc_maq_moagem_seco'), forma_abastecimento: gv('orc_maq_forma_abastecimento'), producao_horaria: gv('orc_maq_producao_horaria'), voltagem: gv('orc_maq_voltagem'), origem: gv('orc_maq_origem'), eCliente: gv('orc_maq_ecliente'), representante: gv('orc_maq_representante'), interno: gv('orc_maq_interno'), tipoMercado: gv('orc_maq_tipomercado'), classificacao: gv('orc_maq_classificacao'), modelo_crm: gv('orc_maq_modelo'), versao_crm: gv('orc_maq_versao'), lang: _maqLang, itens: _itens.map(function(it){ var cp = Object.assign({}, it); if (_maqLang !== 'PT' && cp.valor_unit > 0) { cp.valor_unit = Math.round((cp.valor_unit / _maqRate)*100)/100; cp.total = Math.round((cp.valor_unit * (parseFloat(cp.qtd)||1) * (1 + (parseFloat(cp.ipi)||0)/100))*100)/100; } return cp; }) };
     var _fnC = function(s){ return String(s||'').toUpperCase().replace(/[\/\\:*?"<>|]/g,'').trim(); };
     var _cliente = _fnC(data.cliente).substring(0,30), _cidade = _fnC(data.cidade).substring(0,25), _uf = _fnC(data.estado).substring(0,2);
     var _it0 = data.itens && data.itens[0], _descIt = '';
@@ -10638,6 +10717,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     xml = xml.replace(/##SIGLA##/g, escXml(sigla)); xml = xml.replace(/##PAGAMENTO##/g, escXml(data.pagamento||''));
     xml = xml.replace(/##TOTAL_VAL##/g, fmtNum(sub)); xml = xml.replace(/##IPI_VAL##/g, fmtNum(ipiTot));
     xml = xml.replace(/##GRAND_TOTAL_VAL##/g, fmtNum(grand));
+    if (data.lang && data.lang !== 'PT') {
+      var _mIpiLbl = data.lang === 'EN' ? 'TOTAL TAX' : 'TOTAL IMP.';
+      xml = xml.replace(/TOTAL IPI/g, _mIpiLbl);
+      xml = xml.replace(/(<w:t[^>]*>)\s*R\$\s*(<\/w:t>)/g, '$1USD$2');
+    }
     var itemRowsXml = _mkMaqItemRows(data.itens || []);
     xml = xml.replace(/<w:tr>[\s\S]*?##ITEM_ROWS##[\s\S]*?<\/w:tr>/, itemRowsXml);
     return xml;
@@ -11828,6 +11912,9 @@ document.addEventListener('DOMContentLoaded', measureWebVitals);
         style="padding:0.45rem 0.9rem;background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.35);border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">
         &#8635; Reabrir
       </button>
+      <button id="orc_maq_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:#1E3A5F;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">🇧🇷 PT</button>
+      <button id="orc_maq_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇺🇸 EN</button>
+      <button id="orc_maq_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇦🇷 ES</button>
       <div style="position:relative;">
         <button id="orc_maq_export_btn"
           onclick="(function(e){e.stopPropagation();var m=document.getElementById('orc_maq_export_menu');m.style.display=m.style.display==='none'?'block':'none';})(event)"
