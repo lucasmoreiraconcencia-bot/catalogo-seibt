@@ -1977,7 +1977,7 @@ body.admin-mode .tbl-action-btn.inline-edit { display: inline-flex; }
               <div class="adm-profile-panel open" id="profilePanel_${uid}">
                 <div class="adm-profile-header">
                   <h3>Perfil de ${user.full_name || user.email}</h3>
-                  <button onclick="window.closeProfilePanel('${uid}')" class="adm-btn adm-btn-cancel" style="font-size:0.78rem;">✕ Fechar</button>
+                  <button onclick="window.closeProfilePanel('${uid}')" class="adm-btn adm-btn-cancel" style="font-size:0.78rem;">Fechar</button>
                 </div>
                 <div class="adm-type-tabs" id="typeTabs_${uid}">
                   <button class="adm-type-tab ${isRep ? 'active' : ''}" onclick="window.switchProfileType('${uid}','representante')">Representante</button>
@@ -2022,7 +2022,7 @@ body.admin-mode .tbl-action-btn.inline-edit { display: inline-flex; }
                   <div class="adm-field" style="margin-bottom:0.8rem"><label class="adm-label">Projetos / Responsabilidades</label><textarea id="ef_proj_${uid}" class="adm-textarea" rows="2" placeholder="Descreva os projetos ou áreas de responsabilidade..."></textarea></div>
                 </div>
                 <div style="display:flex;gap:0.5rem;justify-content:flex-end">
-                  <button onclick="window.saveUserProfile('${uid}','${user.email}')" class="adm-btn adm-btn-primary">💾 Salvar Perfil</button>
+                  <button onclick="window.saveUserProfile('${uid}','${user.email}')" class="adm-btn adm-btn-primary">Salvar Perfil</button>
                 </div>
               </div>
             </td>
@@ -2355,10 +2355,10 @@ body.admin-mode .tbl-action-btn.inline-edit { display: inline-flex; }
     if (!p2) { msg.textContent = ''; return; }
     if (p1 === p2) {
       msg.style.color = '#16A34A';
-      msg.textContent = '✓ Senhas conferem';
+      msg.textContent = 'Senhas conferem';
     } else {
       msg.style.color = '#DC2626';
-      msg.textContent = '✗ Senhas não conferem';
+      msg.textContent = 'Senhas não conferem';
     }
   };
 
@@ -3224,7 +3224,7 @@ function renderCards(items) {
       btnSpecsHTML = '<button class="btn-specs" onclick="openSpecsModal(\'' + safeModelo + '\')">&#128269; Ver Especificações Técnicas</button>';
     }
     const _eqIdxCard = (typeof MACHINES !== 'undefined' ? MACHINES : []).indexOf(m);
-    const btnOrcHTML = '<button onclick="openOrcamentoMaquinas(' + _eqIdxCard + ')" style="width:100%;margin-top:0.5rem;padding:0.5rem 0.8rem;background:#1E3A5F;color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;" onmouseover="this.style.background=\'#2D4F7C\'" onmouseout="this.style.background=\'#1E3A5F\'">📋 Gerar Orçamento</button>';
+    const btnOrcHTML = '<button onclick="openOrcamentoMaquinas(' + _eqIdxCard + ')" style="width:100%;margin-top:0.5rem;padding:0.5rem 0.8rem;background:#1E3A5F;color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;" onmouseover="this.style.background=\'#2D4F7C\'" onmouseout="this.style.background=\'#1E3A5F\'">Gerar Orçamento</button>';
 
     const photos = getPhotoArray(m.modelo);
     const allPhotos = photos.length > 0 ? photos : (m.imagem ? [m.imagem] : []);
@@ -3386,7 +3386,7 @@ function renderTable(items) {
   const _canOrcMaq = !!(window.CURRENT_USER_DATA && (window.CURRENT_USER_DATA.role === 'vendedor_interno' || window.CURRENT_USER_DATA.role === 'admin' || window.CURRENT_USER_DATA.role === 'vendedor_externo'));
   const _maqOrcBtn = _canOrcMaq
     ? '<div style="padding:0.5rem 0;margin-bottom:0.4rem;display:flex;gap:0.5rem;align-items:center;">' +
-      '<button onclick="openOrcamentoMaquinas()" style="display:inline-flex;align-items:center;gap:0.35rem;background:#1E3A5F;color:white;border:none;padding:0.3rem 0.9rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:700;font-family:inherit;" onmouseover="this.style.background=\'#2D4F7C\'" onmouseout="this.style.background=\'#1E3A5F\'">📋 Novo Orçamento de Máquinas</button>' +
+      '<button onclick="openOrcamentoMaquinas()" style="display:inline-flex;align-items:center;gap:0.35rem;background:#1E3A5F;color:white;border:none;padding:0.3rem 0.9rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:700;font-family:inherit;" onmouseover="this.style.background=\'#2D4F7C\'" onmouseout="this.style.background=\'#1E3A5F\'">Novo Orçamento de Máquinas</button>' +
       '</div>'
     : '';
   const _fmtR = v => v ? 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
@@ -3409,7 +3409,7 @@ function renderTable(items) {
       if (hasSpecs) {
         actionsHTML += '<button class="tbl-action-btn specs" onclick="openSpecsModal(\'' + safeModelo + '\')" title="Ver Especificações">' + iconSpecs + '</button>';
       }
-      actionsHTML += '<button class="tbl-action-btn" onclick="openOrcamentoMaquinas(' + eqIdx + ')" title="Gerar Orçamento" style="background:#1E3A5F;color:white;font-size:0.72rem;font-weight:700;padding:0.28rem 0.5rem;">📋</button>';
+      actionsHTML += '<button class="tbl-action-btn" onclick="openOrcamentoMaquinas(' + eqIdx + ')" title="Gerar Orçamento" style="background:#1E3A5F;color:white;font-size:0.72rem;font-weight:700;padding:0.28rem 0.5rem;"></button>';
       if (isAdmin) {
         actionsHTML += '<button class="tbl-action-btn adjust" onclick="openIndividualAdjustModal(\'' + safeId + '\')" title="Reajustar Preços">' + iconAdjust + '</button>';
         actionsHTML += '<button class="tbl-action-btn edit" onclick="openEditModal(\'' + safeId + '\')" title="Editar">' + iconEdit + '</button>';
@@ -4189,7 +4189,7 @@ async function handlePhotoSelected(event) {
     }
     var combined = existing.concat(urls).slice(0, 3);
     await setCustomPhotoArray(currentUploadModelo, combined);
-    showToast(urls.length + ' foto(s) adicionada(s). Total: ' + combined.length + '/3 ✅', 'success');
+    showToast(urls.length + ' foto(s) adicionada(s). Total: ' + combined.length + '/3 ', 'success');
     render();
   } catch (err) {
     showToast('Erro: ' + err.message, 'error');
@@ -4491,7 +4491,7 @@ function setupRealtimeSync() {
         if (typeof updateNotifBadge === 'function') updateNotifBadge();
         var _isAdmin = document.body.classList.contains('admin-mode');
         if (!_isAdmin && NOTIFICATIONS.length && NOTIFICATIONS[0].id !== _prevNotifId) {
-          showToast('📢 ' + NOTIFICATIONS[0].msg, 'info', 5000);
+          showToast('' + NOTIFICATIONS[0].msg, 'info', 5000);
         }
 
         // Re-renderizar a interface
@@ -4506,6 +4506,30 @@ function setupRealtimeSync() {
 
 // Iniciar sincronização após carregar dados iniciais
 setTimeout(() => setupRealtimeSync(), 1000);
+
+// Polling de fallback: re-sincroniza EXTRA_OVERRIDES a cada 2 minutos
+// Garante que descrições e demais overrides cheguem a todos os usuários
+// mesmo quando o Realtime do Supabase tem atraso ou perde eventos.
+async function _syncExtraOverrides() {
+  try {
+    var result = await db.from('catalog_data').select('data').eq('id', 'main').single();
+    if (result.error || !result.data) return;
+    var root = result.data.data || {};
+    if (!root.extraOverrides) return;
+    var _fresh = Object.assign({ navalhas: {}, peneiras: {}, reciclagem: {} }, root.extraOverrides);
+    if (JSON.stringify(_fresh) !== JSON.stringify(EXTRA_OVERRIDES)) {
+      EXTRA_OVERRIDES = _fresh;
+      localStorage.setItem('seibt_extra_overrides_v1', JSON.stringify(EXTRA_OVERRIDES));
+      render();
+    }
+  } catch(e) { /* silencioso */ }
+}
+setInterval(_syncExtraOverrides, 2 * 60 * 1000);
+
+// Re-sincroniza quando o usuário volta para a aba (visibilidade)
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') _syncExtraOverrides();
+});
 
 // Realtime para tabela de representantes
 function setupRepresentantesRealtimeSync() {
@@ -6926,11 +6950,11 @@ if ('serviceWorker' in navigator) {
 <div id="representantesAdminModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9997;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;font-family:'DM Sans',sans-serif;" onclick="if(event.target===this)document.getElementById('representantesAdminModal').style.display='none'">
   <div style="background:white;border-radius:12px;padding:2rem;width:100%;max-width:720px;margin:2rem auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;border-bottom:2px solid #E2E8F0;padding-bottom:1rem;">
-      <h2 style="margin:0;color:#1B3A5C;font-size:1.2rem;">🤝 Gerenciar Representantes</h2>
+      <h2 style="margin:0;color:#1B3A5C;font-size:1.2rem;">Gerenciar Representantes</h2>
       <button onclick="document.getElementById('representantesAdminModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">&times;</button>
     </div>
     <div id="repAdminList" style="margin-bottom:1.5rem;"></div>
-    <button onclick="openRepForm(null)" style="background:#1B3A5C;color:white;border:none;padding:0.7rem 1.4rem;border-radius:6px;cursor:pointer;font-weight:600;font-family:inherit;font-size:0.9rem;">➕ Adicionar Representante</button>
+    <button onclick="openRepForm(null)" style="background:#1B3A5C;color:white;border:none;padding:0.7rem 1.4rem;border-radius:6px;cursor:pointer;font-weight:600;font-family:inherit;font-size:0.9rem;">Adicionar Representante</button>
     <!-- Formulário inline de edição -->
     <div id="repFormContainer" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:1.5rem;margin-top:1rem;">
       <h3 id="repFormTitle" style="margin:0 0 1rem;color:#1B3A5C;font-size:1rem;">Representante</h3>
@@ -6946,7 +6970,7 @@ if ('serviceWorker' in navigator) {
       <div style="margin-bottom:0.8rem;"><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Comissão (regras/faixas)</label><textarea id="repFormComissao" rows="3" placeholder="Ex: 5% sobre pedidos até R$50.000&#10;7% acima de R$50.000" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea></div>
       <div style="margin-bottom:1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Cidades Atendidas</label><textarea id="repFormCidades" rows="4" placeholder="Ex: Porto Alegre, Caxias do Sul, Gramado..." style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea></div>
       <div style="display:flex;gap:0.5rem;">
-        <button onclick="saveRepForm()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">💾 Salvar</button>
+        <button onclick="saveRepForm()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">Salvar</button>
         <button onclick="document.getElementById('repFormContainer').style.display='none'" style="background:#E2E8F0;color:#333;border:none;padding:0.7rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;">Cancelar</button>
       </div>
     </div>
@@ -6957,9 +6981,9 @@ if ('serviceWorker' in navigator) {
 <div id="representantesPublicModal" style="display:none;position:fixed;inset:0;background:rgba(27,58,92,0.75);z-index:9996;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;font-family:'DM Sans',sans-serif;backdrop-filter:blur(4px);" onclick="if(event.target===this)document.getElementById('representantesPublicModal').style.display='none'">
   <div style="background:#F4F6F9;border-radius:12px;padding:2rem;width:100%;max-width:900px;margin:2rem auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-      <h2 style="margin:0;color:#1B3A5C;font-size:1.3rem;">🗺️ Nossa Equipe de Representantes</h2>
+      <h2 style="margin:0;color:#1B3A5C;font-size:1.3rem;">Nossa Equipe de Representantes</h2>
       <div style="display:flex;gap:0.5rem;align-items:center;">
-        <button id="repPublicAddBtn" onclick="openRepFormPublic(null)" style="display:none;background:#1B3A5C;color:white;border:none;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:600;">➕ Adicionar</button>
+        <button id="repPublicAddBtn" onclick="openRepFormPublic(null)" style="display:none;background:#1B3A5C;color:white;border:none;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:600;">Adicionar</button>
         <button onclick="document.getElementById('representantesPublicModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">&times;</button>
       </div>
     </div>
@@ -6978,7 +7002,7 @@ if ('serviceWorker' in navigator) {
       <div style="margin-bottom:0.8rem;"><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Comissão</label><textarea id="rpfComissao" rows="3" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea></div>
       <div style="margin-bottom:1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7B8D;margin-bottom:0.3rem;text-transform:uppercase;">Cidades Atendidas</label><textarea id="rpfCidades" rows="3" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea></div>
       <div style="display:flex;gap:0.5rem;">
-        <button onclick="saveRepFormPublic()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">💾 Salvar</button>
+        <button onclick="saveRepFormPublic()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">Salvar</button>
         <button onclick="document.getElementById('repPublicFormContainer').style.display='none'" style="background:#E2E8F0;color:#333;border:none;padding:0.7rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;">Cancelar</button>
       </div>
     </div>
@@ -6990,7 +7014,7 @@ if ('serviceWorker' in navigator) {
 <div id="loginBgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9997;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;" onclick="if(event.target===this)document.getElementById('loginBgModal').style.display='none'">
   <div style="background:white;border-radius:12px;padding:2rem;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-      <h2 style="margin:0;color:#1B3A5C;font-size:1.1rem;">🖼️ Foto de Fundo do Login</h2>
+      <h2 style="margin:0;color:#1B3A5C;font-size:1.1rem;">Foto de Fundo do Login</h2>
       <button onclick="document.getElementById('loginBgModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">&times;</button>
     </div>
     <p style="color:#6B7B8D;font-size:0.85rem;margin-bottom:1rem;">Escolha uma imagem para usar como plano de fundo da tela de login. A imagem será armazenada localmente e no Supabase.</p>
@@ -7002,8 +7026,8 @@ if ('serviceWorker' in navigator) {
       <img id="loginBgPreviewImg" src="" alt="Preview" style="max-height:160px;max-width:100%;border-radius:6px;border:1px solid #E2E8F0;">
     </div>
     <div style="display:flex;gap:0.5rem;">
-      <button onclick="uploadLoginBg()" style="flex:1;background:#1B3A5C;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">⬆️ Aplicar Imagem</button>
-      <button onclick="removeLoginBg()" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.7rem 0.9rem;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;">🗑 Remover</button>
+      <button onclick="uploadLoginBg()" style="flex:1;background:#1B3A5C;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">Aplicar Imagem</button>
+      <button onclick="removeLoginBg()" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.7rem 0.9rem;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;"> Remover</button>
     </div>
     <div id="loginBgStatus" style="margin-top:0.8rem;font-size:0.82rem;text-align:center;color:#6B7B8D;"></div>
   </div>
@@ -7013,7 +7037,7 @@ if ('serviceWorker' in navigator) {
 <div id="navPenCodesModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9997;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;font-family:'DM Sans',sans-serif;" onclick="if(event.target===this)document.getElementById('navPenCodesModal').style.display='none'">
   <div style="background:white;border-radius:12px;padding:2rem;width:100%;max-width:680px;margin:2rem auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;border-bottom:2px solid #E2E8F0;padding-bottom:1rem;">
-      <h2 style="margin:0;color:#1B3A5C;font-size:1.1rem;">⚙️ Regras: Navalhas e Peneiras</h2>
+      <h2 style="margin:0;color:#1B3A5C;font-size:1.1rem;">Regras: Navalhas e Peneiras</h2>
       <button onclick="document.getElementById('navPenCodesModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#666;">&times;</button>
     </div>
     <p style="color:#6B7B8D;font-size:0.85rem;margin-bottom:1.2rem;">Edite os textos de referência para os códigos de navalhas e de Ø de furo das peneiras que serão exibidos na interface pública.</p>
@@ -7026,7 +7050,7 @@ if ('serviceWorker' in navigator) {
       <textarea id="penCodesInput" rows="5" placeholder="Ex: Ø6: código 001 | Ø8: código 002 | Ø10: código 003" style="width:100%;padding:0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;resize:vertical;box-sizing:border-box;font-size:0.9rem;"></textarea>
     </div>
     <div style="display:flex;gap:0.5rem;">
-      <button onclick="saveNavPenCodes()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">💾 Salvar</button>
+      <button onclick="saveNavPenCodes()" style="flex:1;background:#E8792B;color:white;border:none;padding:0.7rem;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit;">Salvar</button>
       <button onclick="document.getElementById('navPenCodesModal').style.display='none'" style="background:#E2E8F0;color:#333;border:none;padding:0.7rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;">Fechar</button>
     </div>
     <div id="navPenCodesStatus" style="margin-top:0.8rem;font-size:0.82rem;text-align:center;color:#6B7B8D;"></div>
@@ -7142,8 +7166,8 @@ function renderRepAdminList() {
         <div style="font-size:0.8rem;color:#6B7B8D;">${escHtml(r.regiao)}</div>
       </div>
       <div style="display:flex;gap:0.4rem;">
-        <button onclick="openRepForm('${r.id}')" style="background:#EAF2FB;color:#1B3A5C;border:1px solid #D6E6F5;padding:0.35rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;">✏️ Editar</button>
-        <button onclick="deleteRep('${r.id}')" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.35rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;">🗑</button>
+        <button onclick="openRepForm('${r.id}')" style="background:#EAF2FB;color:#1B3A5C;border:1px solid #D6E6F5;padding:0.35rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;">Editar</button>
+        <button onclick="deleteRep('${r.id}')" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.35rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;"></button>
       </div>
     </div>
   `).join('');
@@ -7236,8 +7260,8 @@ function renderRepPublicGrid() {
     const comissaoLines = comissao ? comissao.split('\n').map(l => `<div>${escHtml(l)}</div>`).join('') : '—';
     const adminBtns = isAdmin ? `
       <div style="display:flex;gap:0.4rem;margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid #E2E8F0;">
-        <button onclick="openRepFormPublic('${r.id}')" style="flex:1;background:#EAF2FB;color:#1B3A5C;border:1px solid #D6E6F5;padding:0.4rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">✏️ Editar</button>
-        <button onclick="deleteRepPublic('${r.id}')" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.4rem 0.7rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">🗑</button>
+        <button onclick="openRepFormPublic('${r.id}')" style="flex:1;background:#EAF2FB;color:#1B3A5C;border:1px solid #D6E6F5;padding:0.4rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">Editar</button>
+        <button onclick="deleteRepPublic('${r.id}')" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.4rem 0.7rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;"></button>
       </div>` : '';
     return `
     <div style="background:white;border-radius:10px;border:1px solid #E2E8F0;overflow:hidden;box-shadow:0 2px 8px rgba(27,58,92,0.06);">
@@ -7416,7 +7440,7 @@ async function uploadLoginBg() {
     }
 
     statusEl.style.color = '#16a34a';
-    statusEl.textContent = '✅ Imagem aplicada e sincronizada para todos!';
+    statusEl.textContent = 'Imagem aplicada e sincronizada para todos!';
   } catch(e) {
     statusEl.style.color = '#c0392b';
     statusEl.textContent = 'Erro: ' + e.message;
@@ -7494,7 +7518,7 @@ async function saveNavPenCodes() {
   } catch(e) {}
   const statusEl = document.getElementById('navPenCodesStatus');
   statusEl.style.color = '#16a34a';
-  statusEl.textContent = '✅ Códigos salvos!';
+  statusEl.textContent = 'Códigos salvos!';
   setTimeout(() => { statusEl.textContent = ''; }, 3000);
 }
 
@@ -7515,12 +7539,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 <!-- ========== MODAL: EDIÇÃO DE ITEM (Admin) ========== -->
 <div id="itemEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9997;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;font-family:'DM Sans',sans-serif;" onclick="if(event.target===this)closeItemEditModal()">
   <div style="background:white;border-radius:var(--radius);padding:1.5rem;width:100%;max-width:600px;margin:2rem auto;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
-    <h3 id="itemEditModalTitle" style="color:var(--navy);margin:0 0 1rem;font-size:1.1rem;border-bottom:2px solid var(--border);padding-bottom:0.5rem;">✏️ Editar Item</h3>
+    <h3 id="itemEditModalTitle" style="color:var(--navy);margin:0 0 1rem;font-size:1.1rem;border-bottom:2px solid var(--border);padding-bottom:0.5rem;">Editar Item</h3>
     <div id="itemEditFormBody"></div>
     <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border);">
-      <button onclick="resetItemEdit()" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.55rem 0.9rem;border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;cursor:pointer;font-weight:600;margin-right:auto;">↺ Restaurar Original</button>
+      <button onclick="resetItemEdit()" style="background:#fee2e2;color:#c0392b;border:1px solid #fca5a5;padding:0.55rem 0.9rem;border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;cursor:pointer;font-weight:600;margin-right:auto;">Restaurar Original</button>
       <button onclick="closeItemEditModal()" style="background:var(--border);color:var(--text);border:none;padding:0.55rem 1.1rem;border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;cursor:pointer;font-weight:600;">Cancelar</button>
-      <button onclick="saveItemEdit()" style="background:var(--accent);color:white;border:none;padding:0.55rem 1.1rem;border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;cursor:pointer;font-weight:600;">💾 Salvar</button>
+      <button onclick="saveItemEdit()" style="background:var(--accent);color:white;border:none;padding:0.55rem 1.1rem;border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;cursor:pointer;font-weight:600;">Salvar</button>
     </div>
   </div>
 </div>
@@ -7578,7 +7602,7 @@ function openItemEditModal(section, idx) {
     const d  = NAVALHAS[idx] || {};
     const ed = (ie.navalhas['nav_' + idx]) || {};
     const ov = (EXTRA_OVERRIDES.navalhas  || {})['nav_' + idx] || {};
-    ttl = '✏️ Editar Navalha';
+    ttl = 'Editar Navalha';
     html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;">' +
       _fgInput('ie_modelo',    'Modelo / Nome',           ed.modelo    !== undefined ? ed.modelo    : d.modelo    || '') +
       _fgInput('ie_cod_fixa',  'Cód. Navalha Fixa',       ed.cod_fixa  !== undefined ? ed.cod_fixa  : d.cod_fixa  || '') +
@@ -7593,7 +7617,7 @@ function openItemEditModal(section, idx) {
     const d  = PENEIRAS[idx] || {};
     const ed = (ie.peneiras['pen_' + idx]) || {};
     const ov = (EXTRA_OVERRIDES.peneiras || {})['pen_' + idx] || {};
-    ttl = '✏️ Editar Peneira';
+    ttl = 'Editar Peneira';
     html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;">' +
       _fgInput('ie_modelo', 'Modelo / Nome',  ed.modelo !== undefined ? ed.modelo : d.modelo || '') +
       _fgInput('ie_valor',  'Valor Base (R$)', ov.valor  !== undefined ? ov.valor  : d.valor  || '', 'number') +
@@ -7605,7 +7629,7 @@ function openItemEditModal(section, idx) {
     const d  = RECICLAGEM[idx] || {};
     const ed = (ie.reciclagem['rec_' + idx]) || {};
     const ov = (EXTRA_OVERRIDES.reciclagem || {})['rec_' + idx] || {};
-    ttl = '✏️ Editar Equipamento de Reciclagem';
+    ttl = 'Editar Equipamento de Reciclagem';
     html = _fgTA('ie_equip', 'Nome do Equipamento', ed.equipamento !== undefined ? ed.equipamento : d.equipamento || '') +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;">' +
       _fgInput('ie_pot',   'Potência (cv)', ed.potencia !== undefined ? ed.potencia : d.potencia || '') +
@@ -7615,7 +7639,7 @@ function openItemEditModal(section, idx) {
   } else if (section === 'linhas_pepp') {
     const d  = LINHAS_PEPP[idx] || {};
     const ed = (ie.linhas_pepp['pepp_' + idx]) || {};
-    ttl = '✏️ Editar Linha PE/PP';
+    ttl = 'Editar Linha PE/PP';
     html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;">' +
       _fgInput('ie_cat',  'Categoria / Tipo',    ed.categoria  !== undefined ? ed.categoria  : d.categoria  || '') +
       _fgInput('ie_cap',  'Capacidade Produtiva', ed.capacidade !== undefined ? ed.capacidade : d.capacidade || '') +
@@ -8022,7 +8046,7 @@ async function resetItemEdit() {
             '<label style="display:block;font-size:0.7rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.25rem;">Descrição</label>' +
             '<textarea rows="2" onchange="updateOrcItem(' + i + ',\'descricao\',this.value)" oninput="updateOrcItem(' + i + ',\'descricao\',this.value)" style="width:100%;padding:0.45rem 0.6rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;font-size:0.82rem;resize:vertical;box-sizing:border-box;">' + (it.descricao||'') + '</textarea>' +
           '</div>' +
-          '<button onclick="duplicateOrcamentoItem(' + i + ')" style="align-self:flex-end;background:#EAF2FB;border:1px solid #BFDBFE;color:var(--navy);padding:0.4rem 0.6rem;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;" title="Duplicar item">⧉ Dup.</button>' +
+          '<button onclick="duplicateOrcamentoItem(' + i + ')" style="align-self:flex-end;background:#EAF2FB;border:1px solid #BFDBFE;color:var(--navy);padding:0.4rem 0.6rem;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;" title="Duplicar item">Dup.</button>' +
         '</div>' +
         '<div style="display:grid;grid-template-columns:80px 1fr 120px 1fr;gap:0.6rem;align-items:end;">' +
           '<div>' +
@@ -8421,9 +8445,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <span style="font-weight:700;font-size:1rem;">Gerar Orçamento — Navalhas</span>
       </div>
       <div style="display:flex;align-items:center;gap:0.5rem;">
-        <button id="orc_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:var(--navy);border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">🇧🇷 PT</button>
-        <button id="orc_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇺🇸 EN</button>
-        <button id="orc_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇦🇷 ES</button>
+        <button id="orc_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:var(--navy);border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">PT</button>
+        <button id="orc_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">EN</button>
+        <button id="orc_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">ES</button>
         <div style="width:1px;height:20px;background:rgba(255,255,255,0.3);margin:0 0.2rem;"></div>
         <button onclick="closeOrcamentoModal()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&times;</button>
       </div>
@@ -8437,7 +8461,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       </div>
       <!-- Dados do Cliente -->
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">📋 Dados do Cliente</div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">Dados do Cliente</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Nº Proposta</label>
@@ -8480,7 +8504,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
       <!-- Itens do Orçamento -->
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">🗡️ Itens do Orçamento</div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">Itens do Orçamento</div>
         <div id="orc_itens_container"></div>
         <div style="display:flex;gap:0.6rem;margin-top:0.8rem;">
           <button onclick="addOrcamentoItem()" style="flex:1;background:white;border:1.5px dashed var(--accent);color:var(--accent);padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;transition:all 0.15s;" onmouseover="this.style.background='#EAF2FB'" onmouseout="this.style.background='white'">+ Adicionar Item</button>
@@ -8519,7 +8543,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
       <!-- Condições -->
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1.2rem;margin-bottom:1.5rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">⚙️ Condições de Fornecimento</div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">Condições de Fornecimento</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Condição de Pagamento</label>
@@ -8547,10 +8571,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <!-- Dados CRM / Google Sheets -->
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
-          <div style="font-size:0.75rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">📊 Dados Complementares</div>
+          <div style="font-size:0.75rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">Dados Complementares</div>
           <div style="display:flex;gap:0.4rem;align-items:center;">
-            <button onclick="window.buscarProposta()" style="font-size:0.72rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">🔍 Buscar Proposta</button>
-            <button onclick="configurarGoogleSheets()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">⚙ Google Sheets</button>
+            <button onclick="window.buscarProposta()" style="font-size:0.72rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">Buscar Proposta</button>
+            <button onclick="configurarGoogleSheets()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;"> Google Sheets</button>
           </div>
         </div>
         <div id="orc_sheets_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.4rem;min-height:1rem;"></div>
@@ -8917,7 +8941,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       try { localStorage.setItem(ORC_OPCOES_CACHE_KEY, JSON.stringify(op)); } catch(_) {}
       _aplicarOpcoes(op);
       var st = document.getElementById('orc_sheets_status');
-      if (st && st.innerHTML.indexOf('⚠️') !== -1) st.innerHTML = ''; // limpar erro anterior
+      if (st && st.innerHTML.indexOf('') !== -1) st.innerHTML = ''; // limpar erro anterior
     }, function(err) {
       console.error('[Sheets] _fetchOpcoes:', err);
       var st = document.getElementById('orc_sheets_status');
@@ -8925,11 +8949,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         var cached = JSON.parse(localStorage.getItem(ORC_OPCOES_CACHE_KEY) || 'null');
         if (cached) {
           _aplicarOpcoes(cached);
-          if (st) st.innerHTML = '<span style="color:#92400E;">📦 Dropdowns do cache local (abra via navegador web para atualizar)</span>';
+          if (st) st.innerHTML = '<span style="color:#92400E;">Dropdowns do cache local (abra via navegador web para atualizar)</span>';
           return;
         }
       } catch(_) {}
-      if (st) st.innerHTML = '<span style="color:#DC2626;">⚠️ Dropdowns não carregaram: ' + (err.message || 'erro') + '</span>';
+      if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram: ' + (err.message || 'erro') + '</span>';
     });
   }
 
@@ -8938,7 +8962,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (url === null) return;
     localStorage.setItem('seibt_sheets_url', url.trim());
     var st = document.getElementById('orc_sheets_status');
-    if (url.trim()) { if (st) st.innerHTML = '⏳ Testando conexão...'; _fetchProximoNumero(); }
+    if (url.trim()) { if (st) st.innerHTML = 'Testando conexão...'; _fetchProximoNumero(); }
     else { if (st) st.innerHTML = ''; }
   };
 
@@ -8990,25 +9014,25 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (!url) {
       var nr = _gerarNumeroLocal();
       _setVal('orc_numero', nr);
-      if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> gerado localmente';
+      if (st) st.innerHTML = 'Nº <strong>' + nr + '</strong> gerado localmente';
       return;
     }
-    if (st) st.innerHTML = '⏳ Buscando nº da proposta...';
+    if (st) st.innerHTML = 'Buscando nº da proposta...';
     var _navAba = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
     window._gasJsonp('nextNum', { aba: _navAba }, function(d) {
       if (d && d.nrProposta) {
         _setVal('orc_numero', d.nrProposta);
-        if (st) st.innerHTML = '🔄 Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
+        if (st) st.innerHTML = 'Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
       } else {
         var nr = _gerarNumeroLocal();
         _setVal('orc_numero', nr);
-        if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> gerado localmente (Sheets sem resposta)';
+        if (st) st.innerHTML = 'Nº <strong>' + nr + '</strong> gerado localmente (Sheets sem resposta)';
       }
     }, function(err) {
       console.error('[Sheets] _fetchProximoNumero:', err);
       var nr = _gerarNumeroLocal();
       _setVal('orc_numero', nr);
-      if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> local — Sheets: ' + (err.message || 'offline');
+      if (st) st.innerHTML = 'Nº <strong>' + nr + '</strong> local — Sheets: ' + (err.message || 'offline');
     });
   }
 
@@ -9044,17 +9068,17 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       nomeContato:     data.atencao     || ''
     });
     var st = document.getElementById('orc_sheets_status');
-    if (st) st.innerHTML = '⏳ Enviando dados para a planilha...';
+    if (st) st.innerHTML = 'Enviando dados para a planilha...';
     var b64 = btoa(unescape(encodeURIComponent(payload)));
     // Usar JSONP via <script> para salvar (fetch bloqueado de file://)
     window._gasJsonp('save', { d: b64 }, function(resp) {
       if (resp && resp.ok) {
-        if (st) st.innerHTML = '✅ Dados salvos na planilha!';
+        if (st) st.innerHTML = 'Dados salvos na planilha!';
       } else {
-        if (st) st.innerHTML = '❌ Erro ao salvar: ' + (resp && resp.erro ? resp.erro : 'resposta inesperada');
+        if (st) st.innerHTML = 'Erro ao salvar: ' + (resp && resp.erro ? resp.erro : 'resposta inesperada');
       }
     }, function(e) {
-      if (st) st.innerHTML = '❌ Falha ao enviar: ' + (e && e.message ? e.message : 'erro de rede');
+      if (st) st.innerHTML = 'Falha ao enviar: ' + (e && e.message ? e.message : 'erro de rede');
       console.error('_enviarParaSheets erro:', e);
     });
   }
@@ -9066,7 +9090,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (window._orcGerando) return;
       window._orcGerando = true;
       var _btnLock = document.getElementById('orc_btn_export');
-      if (_btnLock) { window._orcOrigHTML = _btnLock.innerHTML; _btnLock.disabled = true; _btnLock.innerHTML = '⏳ Aguarde...'; }
+      if (_btnLock) { window._orcOrigHTML = _btnLock.innerHTML; _btnLock.disabled = true; _btnLock.innerHTML = 'Aguarde...'; }
     }
     // ── Guard: busca número fresco no Sheets ao exportar (evita duplicatas) ──────
     if (!window._orcIsUpdate && !window._orcNrFinalizado) {
@@ -9080,7 +9104,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       };
       if (_gUrl) {
         var _gSt = document.getElementById('orc_sheets_status');
-        if (_gSt) _gSt.innerHTML = '⏳ Reservando número...';
+        if (_gSt) _gSt.innerHTML = 'Reservando número...';
         var _navAba2 = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
         window._gasJsonp('nextNum', { aba: _navAba2 }, function(d) {
             if (d && d.nrProposta) { _confirmarNumeroLocal(d.nrProposta); _setVal('orc_numero', d.nrProposta); }
@@ -9333,9 +9357,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         <span style="font-weight:700;font-size:1rem;">Gerar Orçamento — Peneiras</span>
       </div>
       <div style="display:flex;align-items:center;gap:0.5rem;">
-        <button id="orc_pen_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:var(--navy);border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">🇧🇷 PT</button>
-        <button id="orc_pen_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇺🇸 EN</button>
-        <button id="orc_pen_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇦🇷 ES</button>
+        <button id="orc_pen_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:var(--navy);border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">PT</button>
+        <button id="orc_pen_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">EN</button>
+        <button id="orc_pen_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">ES</button>
         <div style="width:1px;height:20px;background:rgba(255,255,255,0.3);margin:0 0.2rem;"></div>
         <button onclick="closeOrcamentoPeneiras()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;">&times;</button>
       </div>
@@ -9349,7 +9373,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       </div>
       <!-- Dados do Cliente -->
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:#0F766E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">📋 Dados do Cliente</div>
+        <div style="font-size:0.75rem;font-weight:700;color:#0F766E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">Dados do Cliente</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Nº Proposta</label>
@@ -9392,7 +9416,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
       <!-- Itens do Orçamento -->
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:#0F766E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">🔲 Itens do Orçamento</div>
+        <div style="font-size:0.75rem;font-weight:700;color:#0F766E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">Itens do Orçamento</div>
         <div id="orc_pen_itens_container"></div>
         <div style="display:flex;gap:0.6rem;margin-top:0.8rem;">
           <button onclick="addPeneirasItem()" style="flex:1;background:white;border:1.5px dashed #0F766E;color:#0F766E;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;transition:all 0.15s;" onmouseover="this.style.background='#F0FDFA'" onmouseout="this.style.background='white'">+ Adicionar Item</button>
@@ -9431,7 +9455,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
       <!-- Condições -->
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:#0F766E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">⚙️ Condições de Fornecimento</div>
+        <div style="font-size:0.75rem;font-weight:700;color:#0F766E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem;">Condições de Fornecimento</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Condição de Pagamento</label>
@@ -9459,10 +9483,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <!-- Dados CRM / Google Sheets -->
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:1.2rem;margin-bottom:1.2rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
-          <div style="font-size:0.75rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">📊 Dados Complementares</div>
+          <div style="font-size:0.75rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">Dados Complementares</div>
           <div style="display:flex;gap:0.4rem;align-items:center;">
-            <button onclick="window.buscarProposta()" style="font-size:0.72rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">🔍 Buscar Proposta</button>
-            <button onclick="configurarGoogleSheetsPen()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">⚙ Google Sheets</button>
+            <button onclick="window.buscarProposta()" style="font-size:0.72rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;">Buscar Proposta</button>
+            <button onclick="configurarGoogleSheetsPen()" style="font-size:0.72rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.25rem 0.7rem;cursor:pointer;font-family:inherit;font-weight:600;"> Google Sheets</button>
           </div>
         </div>
         <div id="orc_pen_sheets_status" style="font-size:0.72rem;color:#6B7B8D;margin-bottom:0.4rem;min-height:1rem;"></div>
@@ -9883,23 +9907,23 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   function _fetchPenProximoNumero() {
     var st = document.getElementById('orc_pen_sheets_status');
     var url = _getSheetsUrl();
-    if (!url) { var nr = _gerarNrLocalPen(); _setValP('orc_pen_numero', nr); if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> gerado localmente'; return; }
-    if (st) st.innerHTML = '⏳ Buscando nº da proposta...';
+    if (!url) { var nr = _gerarNrLocalPen(); _setValP('orc_pen_numero', nr); if (st) st.innerHTML = 'Nº <strong>' + nr + '</strong> gerado localmente'; return; }
+    if (st) st.innerHTML = 'Buscando nº da proposta...';
     var _penAba = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
     window._gasJsonp('nextNum', { aba: _penAba }, function(d) {
       if (d && d.nrProposta) {
         _setValP('orc_pen_numero', d.nrProposta);
-        if (st) st.innerHTML = '🔄 Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
+        if (st) st.innerHTML = 'Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
       } else {
         var nr = _gerarNrLocalPen();
         _setValP('orc_pen_numero', nr);
-        if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> gerado localmente';
+        if (st) st.innerHTML = 'Nº <strong>' + nr + '</strong> gerado localmente';
       }
     }, function(err) {
       console.error('[Sheets] _fetchPenProximoNumero:', err);
       var nr = _gerarNrLocalPen();
       _setValP('orc_pen_numero', nr);
-      if (st) st.innerHTML = '🔢 Nº <strong>' + nr + '</strong> local — Sheets: ' + (err.message || 'offline');
+      if (st) st.innerHTML = 'Nº <strong>' + nr + '</strong> local — Sheets: ' + (err.message || 'offline');
     });
   }
   function _popularSelectPen(id, opcoes) {
@@ -9924,7 +9948,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }, function(err) {
       console.error('[Sheets] _fetchPenOpcoes:', err);
       var st = document.getElementById('orc_pen_sheets_status');
-      if (st) st.innerHTML = '<span style="color:#DC2626;">⚠️ Dropdowns não carregaram: ' + (err.message || 'erro') + '</span>';
+      if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram: ' + (err.message || 'erro') + '</span>';
     });
   }
   window.configurarGoogleSheetsPen = function() {
@@ -9932,7 +9956,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (url === null) return;
     localStorage.setItem('seibt_sheets_url', url.trim());
     var st = document.getElementById('orc_pen_sheets_status');
-    if (url.trim()) { if (st) st.innerHTML = '⏳ Testando conexão...'; _fetchPenProximoNumero(); }
+    if (url.trim()) { if (st) st.innerHTML = 'Testando conexão...'; _fetchPenProximoNumero(); }
     else { if (st) st.innerHTML = ''; }
   };
   function _enviarParaSheetsPen(data) {
@@ -9952,16 +9976,16 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       receitaEstimada: (function(v){ var n = parseFloat(String(v||0).replace(/[^\d.,\-]/g,'').replace(',','.')); if(isNaN(n)) return 'R$ 0,00'; return 'R$ ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.').replace(/\.(\d{2})$/, ',$1'); })(data.total), emailContato: data.email || '', nomeContato: data.atencao || ''
     });
     var st = document.getElementById('orc_pen_sheets_status');
-    if (st) st.innerHTML = '⏳ Enviando dados para a planilha...';
+    if (st) st.innerHTML = 'Enviando dados para a planilha...';
     var b64 = btoa(unescape(encodeURIComponent(payload)));
     window._gasJsonp('save', { d: b64 }, function(resp) {
       if (resp && resp.ok) {
-        if (st) st.innerHTML = '✅ Dados salvos na planilha!';
+        if (st) st.innerHTML = 'Dados salvos na planilha!';
       } else {
-        if (st) st.innerHTML = '❌ Erro ao salvar: ' + (resp && resp.erro ? resp.erro : 'resposta inesperada');
+        if (st) st.innerHTML = 'Erro ao salvar: ' + (resp && resp.erro ? resp.erro : 'resposta inesperada');
       }
     }, function(e) {
-      if (st) st.innerHTML = '❌ Falha ao enviar: ' + (e && e.message ? e.message : 'erro de rede');
+      if (st) st.innerHTML = 'Falha ao enviar: ' + (e && e.message ? e.message : 'erro de rede');
     });
   }
 
@@ -9973,7 +9997,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (window._orcPenGerando) return;
       window._orcPenGerando = true;
       var _btnLockP = document.getElementById('orc_pen_btn_export');
-      if (_btnLockP) { window._orcPenOrigHTML = _btnLockP.innerHTML; _btnLockP.disabled = true; _btnLockP.innerHTML = '⏳ Aguarde...'; }
+      if (_btnLockP) { window._orcPenOrigHTML = _btnLockP.innerHTML; _btnLockP.disabled = true; _btnLockP.innerHTML = 'Aguarde...'; }
     }
     // ── Guard Peneiras: busca número fresco no Sheets ao exportar (evita duplicatas) ────
     if (!window._orcPenIsUpdate && !window._orcPenNrFinalizado) {
@@ -9987,7 +10011,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       };
       if (_gUrlP) {
         var _gStP = document.getElementById('orc_pen_sheets_status');
-        if (_gStP) _gStP.innerHTML = '⏳ Reservando número...';
+        if (_gStP) _gStP.innerHTML = 'Reservando número...';
         var _penAba2 = (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP';
         window._gasJsonp('nextNum', { aba: _penAba2 }, function(d) {
             if (d && d.nrProposta) { _confirmarNrLocalPen(d.nrProposta); _setValP('orc_pen_numero', d.nrProposta); }
@@ -10562,7 +10586,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (d && d.nrProposta) {
         if (numEl && (!numEl.value || numEl.value === '---')) numEl.value = d.nrProposta;
         if (window._confirmarNumeroLocal) window._confirmarNumeroLocal(d.nrProposta);
-        if (stEl) stEl.innerHTML = '🔄 Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
+        if (stEl) stEl.innerHTML = 'Nº <strong>' + d.nrProposta + '</strong> provisório — será confirmado ao gerar';
       }
     }, function() {
       var nr = window._gerarNumeroLocal ? window._gerarNumeroLocal() : '---';
@@ -10633,7 +10657,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (window._orcMaqGerando) return;
       window._orcMaqGerando = true;
       var _btnLockM = document.getElementById('orc_maq_export_btn');
-      if (_btnLockM) { window._orcMaqOrigHTML = _btnLockM.innerHTML; _btnLockM.disabled = true; _btnLockM.innerHTML = '⏳ Aguarde...'; }
+      if (_btnLockM) { window._orcMaqOrigHTML = _btnLockM.innerHTML; _btnLockM.disabled = true; _btnLockM.innerHTML = 'Aguarde...'; }
     }
     // ── Guard Máquinas: busca número fresco no Sheets ao exportar (evita duplicatas) ──
     if (!window._orcMaqIsUpdate && !window._orcMaqNrFinalizado) {
@@ -11420,7 +11444,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </div>
     <div class="inline-edit-footer">
       <button class="inline-edit-btn-cancel" onclick="closeInlineEditNavalha()">Cancelar</button>
-      <button class="inline-edit-btn-save" onclick="saveInlineEditNavalha()">💾 Salvar alterações</button>
+      <button class="inline-edit-btn-save" onclick="saveInlineEditNavalha()">Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -11454,7 +11478,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </div>
     <div class="inline-edit-footer">
       <button class="inline-edit-btn-cancel" onclick="closeInlineEditPeneira()">Cancelar</button>
-      <button class="inline-edit-btn-save" onclick="saveInlineEditPeneira()">💾 Salvar alterações</button>
+      <button class="inline-edit-btn-save" onclick="saveInlineEditPeneira()">Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -11482,7 +11506,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </div>
     <div class="inline-edit-footer">
       <button class="inline-edit-btn-cancel" onclick="closeInlineEditReciclagem()">Cancelar</button>
-      <button class="inline-edit-btn-save" onclick="saveInlineEditReciclagem()">💾 Salvar alterações</button>
+      <button class="inline-edit-btn-save" onclick="saveInlineEditReciclagem()">Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -11900,7 +11924,7 @@ function measureWebVitals() {
       var lcp = entries[entries.length - 1];
       var ms = Math.round(lcp.renderTime || lcp.loadTime);
       if (ms > 2500) {
-        console.warn('[SEIBT Perf] ⚠ LCP lento: ' + ms + 'ms (ideal <2500ms)');
+        console.warn('[SEIBT Perf]  LCP lento: ' + ms + 'ms (ideal <2500ms)');
       }
     }).observe({ entryTypes: ['largest-contentful-paint'] });
   } catch(e) {}
@@ -11912,7 +11936,7 @@ function measureWebVitals() {
         if (!entry.hadRecentInput) clsValue += entry.value;
       });
       if (clsValue > 0.1) {
-        console.warn('[SEIBT Perf] ⚠ CLS alto: ' + clsValue.toFixed(3) + ' (ideal <0.1)');
+        console.warn('[SEIBT Perf]  CLS alto: ' + clsValue.toFixed(3) + ' (ideal <0.1)');
       }
     }).observe({ entryTypes: ['layout-shift'] });
   } catch(e) {}
@@ -11973,9 +11997,9 @@ document.addEventListener('DOMContentLoaded', measureWebVitals);
         style="padding:0.45rem 0.9rem;background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.35);border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;">
         &#8635; Reabrir
       </button>
-      <button id="orc_maq_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:#1E3A5F;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">🇧🇷 PT</button>
-      <button id="orc_maq_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇺🇸 EN</button>
-      <button id="orc_maq_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">🇦🇷 ES</button>
+      <button id="orc_maq_lang_pt" onclick="setOrcLang('PT')" style="background:white;color:#1E3A5F;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:700;">PT</button>
+      <button id="orc_maq_lang_en" onclick="setOrcLang('EN')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">EN</button>
+      <button id="orc_maq_lang_es" onclick="setOrcLang('ES')" style="background:rgba(255,255,255,0.15);color:white;border:none;padding:0.3rem 0.6rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:500;">ES</button>
       <div style="position:relative;">
         <button id="orc_maq_export_btn"
           onclick="(function(e){e.stopPropagation();var m=document.getElementById('orc_maq_export_menu');m.style.display=m.style.display==='none'?'block':'none';})(event)"
@@ -12053,7 +12077,7 @@ document.addEventListener('DOMContentLoaded', measureWebVitals);
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
           <div style="font-size:0.69rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.06em;">&#128202; Dados Complementares</div>
           <div style="display:flex;gap:0.4rem;align-items:center;">
-            <button onclick="window.buscarProposta()" style="font-size:0.68rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.18rem 0.45rem;cursor:pointer;font-family:inherit;font-weight:600;">🔍 Buscar</button>
+            <button onclick="window.buscarProposta()" style="font-size:0.68rem;color:#1B3A5C;background:white;border:1px solid #BFDBFE;border-radius:4px;padding:0.18rem 0.45rem;cursor:pointer;font-family:inherit;font-weight:600;">Buscar</button>
             <button onclick="configurarGoogleSheets()" style="font-size:0.68rem;color:#166534;background:white;border:1px solid #BBF7D0;border-radius:4px;padding:0.18rem 0.45rem;cursor:pointer;font-family:inherit;font-weight:600;" title="Configurar Google Sheets">&#9881; Sheets</button>
           </div>
         </div>
@@ -12382,7 +12406,7 @@ window.configurarPastaPropostas = async function() {
     var handle = await window.showDirectoryPicker({ mode: 'readwrite' });
     await _salvarPastaHandle(handle);
     _atualizarExibicaoPasta();
-    showToast('✅ Pasta configurada: ' + handle.name, 'success');
+    showToast('Pasta configurada: ' + handle.name, 'success');
   } catch(e) {
     if (e && e.name !== 'AbortError') showToast('Erro ao configurar pasta: ' + e.message, 'error');
   }
@@ -12398,19 +12422,19 @@ function _atualizarExibicaoPasta() {
   var html;
   if (!suporte) {
     html = '<div style="display:flex;align-items:center;gap:0.5rem;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:0.45rem 0.75rem;">' +
-      '<span style="font-size:0.8rem;color:#92400E;">⚠️ Seu navegador não suporta seleção de pasta. Use Chrome ou Edge para salvar na pasta escolhida.</span>' +
+      '<span style="font-size:0.8rem;color:#92400E;">Seu navegador não suporta seleção de pasta. Use Chrome ou Edge para salvar na pasta escolhida.</span>' +
       '</div>';
   } else if (nome) {
     html = '<div style="display:flex;align-items:center;gap:0.6rem;background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:7px;padding:0.45rem 0.8rem;">' +
-      '<span style="font-size:1rem;">📁</span>' +
+      '<span style="font-size:1rem;"></span>' +
       '<span style="font-size:0.82rem;color:#15803D;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + nome + '">Salvando em: <strong>' + nome + '</strong></span>' +
-      '<button onclick="window.configurarPastaPropostas()" style="flex-shrink:0;font-size:0.72rem;color:#166534;background:white;border:1px solid #86EFAC;border-radius:5px;padding:0.2rem 0.6rem;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;">✏️ Alterar pasta</button>' +
+      '<button onclick="window.configurarPastaPropostas()" style="flex-shrink:0;font-size:0.72rem;color:#166534;background:white;border:1px solid #86EFAC;border-radius:5px;padding:0.2rem 0.6rem;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;">Alterar pasta</button>' +
       '</div>';
   } else {
     html = '<div style="display:flex;align-items:center;gap:0.6rem;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:7px;padding:0.45rem 0.8rem;">' +
-      '<span style="font-size:1rem;">📂</span>' +
+      '<span style="font-size:1rem;"></span>' +
       '<span style="font-size:0.82rem;color:#991B1B;font-weight:600;flex:1;">Pasta de destino não configurada</span>' +
-      '<button onclick="window.configurarPastaPropostas()" style="flex-shrink:0;font-size:0.78rem;color:white;background:#DC2626;border:none;border-radius:5px;padding:0.25rem 0.75rem;cursor:pointer;font-family:inherit;font-weight:700;white-space:nowrap;">📁 Escolher pasta</button>' +
+      '<button onclick="window.configurarPastaPropostas()" style="flex-shrink:0;font-size:0.78rem;color:white;background:#DC2626;border:none;border-radius:5px;padding:0.25rem 0.75rem;cursor:pointer;font-family:inherit;font-weight:700;white-space:nowrap;">Escolher pasta</button>' +
       '</div>';
   }
   ['orc_pasta_status','orc_pen_pasta_status','orc_maq_pasta_status'].forEach(function(id) {
@@ -12423,10 +12447,10 @@ function _mostrarSucessoSalvamento(pastaNome, nomeArquivo) {
   var div = document.createElement('div');
   div.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:3px solid #16A34A;border-radius:16px;padding:2rem 2.5rem;z-index:999999;font-family:\'DM Sans\',sans-serif;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.35);max-width:480px;width:90%;animation:fadeInScale 0.2s ease;';
   div.innerHTML =
-    '<div style="font-size:3.5rem;margin-bottom:0.5rem;">✅</div>' +
+    '<div style="font-size:3.5rem;margin-bottom:0.5rem;"></div>' +
     '<div style="font-size:1.4rem;font-weight:700;color:#15803D;margin-bottom:0.7rem;">PROPOSTA SALVA!</div>' +
-    '<div style="font-size:0.95rem;color:#374151;margin-bottom:0.4rem;">📁 Pasta: <strong>' + pastaNome + '</strong></div>' +
-    '<div style="font-size:0.82rem;color:#6B7280;word-break:break-all;background:#F0FDF4;border:1px solid #BBF7D0;padding:0.6rem 0.8rem;border-radius:8px;margin-bottom:1.2rem;">📄 ' + nomeArquivo + '</div>' +
+    '<div style="font-size:0.95rem;color:#374151;margin-bottom:0.4rem;">Pasta: <strong>' + pastaNome + '</strong></div>' +
+    '<div style="font-size:0.82rem;color:#6B7280;word-break:break-all;background:#F0FDF4;border:1px solid #BBF7D0;padding:0.6rem 0.8rem;border-radius:8px;margin-bottom:1.2rem;">' + nomeArquivo + '</div>' +
     '<button onclick="this.parentElement.remove()" style="background:#16A34A;color:white;border:none;padding:0.75rem 2.5rem;border-radius:8px;cursor:pointer;font-family:inherit;font-size:1.05rem;font-weight:700;width:100%;">OK, entendi!</button>';
   document.body.appendChild(div);
   setTimeout(function() { if (div.parentNode) div.remove(); }, 8000);
@@ -12461,7 +12485,7 @@ window.buscarProposta = function(numero) {
     var local = locais[nr];
     if (local) {
       html += '<div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:10px;padding:1.2rem;margin-bottom:1rem;">' +
-        '<div style="font-weight:700;color:#15803D;font-size:1rem;margin-bottom:0.6rem;">📁 Local encontrado!</div>' +
+        '<div style="font-weight:700;color:#15803D;font-size:1rem;margin-bottom:0.6rem;">Local encontrado!</div>' +
         '<div style="margin-bottom:0.3rem;"><strong>Pasta:</strong> ' + local.pasta + '</div>' +
         '<div style="word-break:break-all;"><strong>Arquivo:</strong> ' + local.arquivo + '</div>' +
         '<div style="font-size:0.75rem;color:#6B7280;margin-top:0.5rem;">Salvo em: ' + new Date(local.ts).toLocaleString('pt-BR') + '</div>' +
@@ -12474,7 +12498,7 @@ window.buscarProposta = function(numero) {
     var hist = JSON.parse(localStorage.getItem('seibt_proposals_v1') || '[]');
     var props = hist.filter(function(p){ return String(p.numero_completo||p.numero_base||'').replace(/\s/g,'').indexOf(nr) !== -1; });
     if (props.length) {
-      html += '<div style="margin-bottom:0.5rem;font-weight:700;color:#1B3A5C;">📋 Dados da proposta:</div>';
+      html += '<div style="margin-bottom:0.5rem;font-weight:700;color:#1B3A5C;">Dados da proposta:</div>';
       props.forEach(function(p) {
         var tipo = p.tipo === 'navalhas' ? 'Navalhas' : p.tipo === 'peneiras' ? 'Peneiras' : 'Máquinas';
         var dt = p.ts ? new Date(p.ts).toLocaleString('pt-BR') : '—';
@@ -12492,7 +12516,7 @@ window.buscarProposta = function(numero) {
 
   if (!html) {
     html = '<div style="text-align:center;color:#6B7280;padding:1.5rem;">' +
-      '<div style="font-size:2rem;margin-bottom:0.5rem;">🔍</div>' +
+      '<div style="font-size:2rem;margin-bottom:0.5rem;"></div>' +
       '<div>Nenhum registro encontrado para <strong>' + nr + '</strong>.</div>' +
       '<div style="margin-top:1rem;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:1rem;font-size:0.85rem;text-align:left;">' +
       '<strong>Dica para encontrar o arquivo:</strong><br>' +
@@ -12508,7 +12532,7 @@ window.buscarProposta = function(numero) {
   modal.innerHTML =
     '<div style="background:#fff;border-radius:14px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.3);">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">' +
-    '<h3 style="margin:0;color:#1B3A5C;font-size:1.1rem;">🔍 Proposta ' + nr + '</h3>' +
+    '<h3 style="margin:0;color:#1B3A5C;font-size:1.1rem;">Proposta ' + nr + '</h3>' +
     '<button onclick="this.closest(\'div[style]\').remove()" style="background:#F1F5F9;border:none;width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:1.2rem;">&times;</button>' +
     '</div>' + html + '</div>';
   document.body.appendChild(modal);
