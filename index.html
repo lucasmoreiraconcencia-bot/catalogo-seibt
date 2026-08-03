@@ -8349,13 +8349,25 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   var _FILL_LABELS = {
     PT: { proposta:'PROPOSTA Nº:', data:'DATA:', cliente:'CLIENTE:', cidade:'CIDADE:', estado:'ESTADO:',
           atencao:'AT. :', fone:'FONE:', fatur:'AS NAVALHAS SÃO FATURADAS (NF) POR PEÇA',
-          ipiLbl:'TOTAL IPI ', cur:'R$' },
+          ipiLbl:'TOTAL IPI ', cur:'R$',
+          titulo:'FACAS INDUSTRIAIS PARA MOINHOS PARA PLÁSTICO, PAPEL E MADEIRA, COM GARANTIA DE QUALIDADE, DURABILIDADE, PRODUTIVIDADE, RESISTÊNCIA E PRECISÃO',
+          intro:'Atendendo solicitação, apresentamos à apreciação de V. Sas. proposta de fornecimento do que segue:',
+          descProd:'DESCRIÇÃO DOS PRODUTOS', detalhes:'DETALHES', qtd:'Qnt.',
+          precoUnit:'PREÇO UNIT. (R$)', ipiCol:'IPI (%)', totalCol:'TOTAL (R$)' },
     EN: { proposta:'PROPOSAL No.:', data:'DATE:', cliente:'CUSTOMER:', cidade:'CITY:', estado:'STATE/COUNTRY:',
           atencao:'ATTN.:', fone:'PHONE:', fatur:'BLADES ARE INVOICED PER PIECE',
-          ipiLbl:'TOTAL TAX ', cur:'USD' },
+          ipiLbl:'TOTAL TAX ', cur:'USD',
+          titulo:'INDUSTRIAL BLADES FOR PLASTIC, PAPER AND WOOD GRINDERS, WITH QUALITY GUARANTEE, DURABILITY, PRODUCTIVITY, RESISTANCE AND PRECISION',
+          intro:'In response to your request, we are pleased to present our supply proposal for the following:',
+          descProd:'PRODUCT DESCRIPTION', detalhes:'DETAILS', qtd:'Qty.',
+          precoUnit:'UNIT PRICE (USD)', ipiCol:'TAX (%)', totalCol:'TOTAL (USD)' },
     ES: { proposta:'PROPUESTA N°:', data:'FECHA:', cliente:'CLIENTE:', cidade:'CIUDAD:', estado:'ESTADO/PAÍS:',
           atencao:'ATN.:', fone:'TEL.:', fatur:'LAS CUCHILLAS SON FACTURADAS POR PIEZA',
-          ipiLbl:'TOTAL IMP. ', cur:'USD' }
+          ipiLbl:'TOTAL IMP. ', cur:'USD',
+          titulo:'CUCHILLAS INDUSTRIALES PARA MOLINOS DE PLÁSTICO, PAPEL Y MADERA, CON GARANTÍA DE CALIDAD, DURABILIDAD, PRODUCTIVIDAD, RESISTENCIA Y PRECISIÓN',
+          intro:'En atención a su solicitud, presentamos a su consideración nuestra propuesta de suministro de lo siguiente:',
+          descProd:'DESCRIPCIÓN DE PRODUCTOS', detalhes:'DETALLES', qtd:'Cant.',
+          precoUnit:'PRECIO UNIT. (USD)', ipiCol:'IMP. (%)', totalCol:'TOTAL (USD)' }
   };
 
   function fillXml(xml, data) {
@@ -8417,6 +8429,15 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     // Vendor
     xml = xml.replace(/(<w:t[^>]*>)Lucas Moreira Concencia(<\/w:t>)/, '$1'+escXml(data.vendedor)+'$2');
     if(data.vendedorSigla) xml = xml.replace(/(<w:t[^>]*>)\(LMC\)(<\/w:t>)/, '$1('+escXml(data.vendedorSigla)+')$2');
+    // Document title, intro and table column headers
+    xml = xml.replace(/(<w:t[^>]*>)FACAS INDUSTRIAIS[^<]*(<\/w:t>)/, '$1'+L.titulo+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)Atendendo solicita[^<]*(<\/w:t>)/, '$1'+L.intro+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)DESCRIÇÃO DOS PRODUTOS(<\/w:t>)/, '$1'+L.descProd+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)DETALHES(<\/w:t>)/, '$1'+L.detalhes+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)Qnt\.(<\/w:t>)/, '$1'+L.qtd+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)PREÇO UNIT\. \(R\$\)(<\/w:t>)/, '$1'+L.precoUnit+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)IPI \(%\)(<\/w:t>)/, '$1'+L.ipiCol+'$2');
+    xml = xml.replace(/(<w:t[^>]*>)TOTAL \(R\$\)(<\/w:t>)/, '$1'+L.totalCol+'$2');
     return xml;
   }
 
@@ -8814,7 +8835,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     _renderItens();
   };
 
-  window.openOrcamentoNavalhas = function(navIdx) {
+  window.openOrcamentoNavalhas = async function(navIdx) {
     var modal = document.getElementById('orcamentoNavalhasModal');
     if (!modal) return;
     var _role = window.CURRENT_USER_DATA && window.CURRENT_USER_DATA.role;
@@ -8827,6 +8848,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     window._orcNrFinalizado = false;
     var _banNav = document.getElementById('orc_update_banner'); if (_banNav) _banNav.style.display = 'none';
     _itens.length = 0;
+    try { await _syncExtraOverrides(); } catch(e) {}
     var obsText = '';
     try {
       var NAVS = window.NAVALHAS || (typeof NAVALHAS !== 'undefined' ? NAVALHAS : []);
@@ -8879,6 +8901,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     } else {
       if (st) st.innerHTML = '<span style="color:#9CA3AF;font-style:italic;">Configure o Google Sheets para gerar o nº automaticamente.</span>';
     }
+    if (typeof window.setOrcLang === 'function') window.setOrcLang(window._orcLang || 'PT');
     _renderItens();
     if (typeof _atualizarExibicaoPasta === 'function') _atualizarExibicaoPasta();
     setTimeout(function() { var f = modal.querySelector('input'); if (f) f.focus(); }, 150);
