@@ -10182,6 +10182,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var _pCur    = _pl !== 'PT' ? 'USD' : 'R$';
     var endereco = (data.cidade||'') + (data.estado ? ', '+data.estado : '');
 
+    // Translate a label that appears as full <w:t> content
+    function trLabel(x, ptText, enText, esText) {
+      var tr = _pl === 'EN' ? enText : _pl === 'ES' ? esText : null;
+      if (!tr || tr === ptText) return x;
+      var esc = ptText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return x.replace(new RegExp('(<w:t(?:\\s[^>]*)?>)' + esc + '(<\\/w:t>)', 'g'), '$1' + tr + '$2');
+    }
+
     // Helper: inject a value into the empty <w:p> of the cell immediately after the label cell.
     function injectAfterLabel(xml, labelLiteral, value) {
       if (value === undefined || value === null || value === '') return xml;
@@ -10199,7 +10207,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       '$1<w:t xml:space="preserve">: '+escXml(data.numero)+'</w:t>$2<w:t></w:t>'
     );
     // DATA: was merged to single run: "DATA:  //2026"
-    xml = xml.replace(/(<w:t[^>]*>)DATA:  \/\/2026(<\/w:t>)/, '$1DATA: '+escXml(data.data)+'$2');
+    var _dataLbl = _pl==='EN' ? 'DATE:' : _pl==='ES' ? 'FECHA:' : 'DATA:';
+    xml = xml.replace(/(<w:t[^>]*>)DATA:  \/\/2026(<\/w:t>)/, '$1'+_dataLbl+' '+escXml(data.data)+'$2');
 
     // Inject values into the empty cells next to each label
     xml = injectAfterLabel(xml, 'CLIENTE: ', data.cliente);
@@ -10245,6 +10254,22 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     xml = xml.replace(/(<w:t[^>]*>)15 dias(<\/w:t>)/, '$1'+escXml(data.validade)+'$2');
     xml = xml.replace(/(<w:t[^>]*>)Lucas Moreira Concencia (<\/w:t>)/, '$1'+escXml(data.vendedor)+' $2');
     if (data.vendedorSigla) xml = xml.replace(/(<w:t[^>]*>)LMC(<\/w:t>)/, '$1'+escXml(data.vendedorSigla)+'$2');
+    // Translate static labels in the template
+    if (_pl !== 'PT') {
+      xml = trLabel(xml, 'PROPOSTA Nº', _pl==='EN'?'PROPOSAL No.':'PROPUESTA N°', _pl==='EN'?'PROPOSAL No.':'PROPUESTA N°');
+      xml = trLabel(xml, 'CLIENTE: ',       _pl==='EN'?'CUSTOMER: ':'CLIENTE: ',           _pl==='EN'?'CUSTOMER: ':'CLIENTE: ');
+      xml = trLabel(xml, 'ENDEREÇO: ', _pl==='EN'?'ADDRESS: ':'DIRECCIÓN: ',     _pl==='EN'?'ADDRESS: ':'DIRECCIÓN: ');
+      xml = trLabel(xml, 'A/C SR(A).:',     _pl==='EN'?'ATTN.:':'ATN.:',                   _pl==='EN'?'ATTN.:':'ATN.:');
+      xml = trLabel(xml, 'TELEFONE: ',      _pl==='EN'?'PHONE: ':'TEL.: ',                 _pl==='EN'?'PHONE: ':'TEL.: ');
+      xml = trLabel(xml, 'C/C | REPRESENTANTE:', _pl==='EN'?'C/C | REPRESENTATIVE:':'C/C | REPRESENTANTE:', _pl==='EN'?'C/C | REPRESENTATIVE:':'C/C | REPRESENTANTE:');
+      xml = trLabel(xml, 'SUBTOTAL',        'SUBTOTAL', 'SUBTOTAL');
+      xml = trLabel(xml, 'TOTAL GERAL',     _pl==='EN'?'GRAND TOTAL':'TOTAL GENERAL',      _pl==='EN'?'GRAND TOTAL':'TOTAL GENERAL');
+      xml = trLabel(xml, 'PAGAMENTO:',      _pl==='EN'?'PAYMENT TERMS:':'CONDICIONES DE PAGO:',  _pl==='EN'?'PAYMENT TERMS:':'CONDICIONES DE PAGO:');
+      xml = trLabel(xml, 'PRAZO:',          _pl==='EN'?'DELIVERY TIME:':'PLAZO DE ENTREGA:', _pl==='EN'?'DELIVERY TIME:':'PLAZO DE ENTREGA:');
+      xml = trLabel(xml, 'FRETE:',          _pl==='EN'?'FREIGHT:':'FLETE:',                _pl==='EN'?'FREIGHT:':'FLETE:');
+      xml = trLabel(xml, 'VALIDADE:',       _pl==='EN'?'VALIDITY:':'VALIDEZ:',             _pl==='EN'?'VALIDITY:':'VALIDEZ:');
+      xml = trLabel(xml, 'VENDEDOR:',       _pl==='EN'?'SALES REP.:':'VENDEDOR:',          _pl==='EN'?'SALES REP.:':'VENDEDOR:');
+    }
     return xml;
   }
 
@@ -10718,9 +10743,45 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     xml = xml.replace(/##TOTAL_VAL##/g, fmtNum(sub)); xml = xml.replace(/##IPI_VAL##/g, fmtNum(ipiTot));
     xml = xml.replace(/##GRAND_TOTAL_VAL##/g, fmtNum(grand));
     if (data.lang && data.lang !== 'PT') {
-      var _mIpiLbl = data.lang === 'EN' ? 'TOTAL TAX' : 'TOTAL IMP.';
+      var _mpl = data.lang;
+      var _mIpiLbl = _mpl === 'EN' ? 'TOTAL TAX' : 'TOTAL IMP.';
       xml = xml.replace(/TOTAL IPI/g, _mIpiLbl);
       xml = xml.replace(/(<w:t[^>]*>)\s*R\$\s*(<\/w:t>)/g, '$1USD$2');
+      // Translate static labels inside the template XML
+      function _mTr(x, ptText, enText, esText) {
+        var tr = _mpl === 'EN' ? enText : esText;
+        if (!tr || tr === ptText) return x;
+        var esc = ptText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return x.replace(new RegExp('(<w:t(?:\\s[^>]*)?>)' + esc + '(<\\/w:t>)', 'g'), '$1' + tr + '$2');
+      }
+      xml = _mTr(xml, 'PROPOSTA Nº',           'PROPOSAL No.',          'PROPUESTA N°');
+      xml = _mTr(xml, 'PROPOSTA N°',            'PROPOSAL No.',          'PROPUESTA N°');
+      xml = _mTr(xml, 'DATA:',                  'DATE:',                 'FECHA:');
+      xml = _mTr(xml, 'CLIENTE:',               'CUSTOMER:',             'CLIENTE:');
+      xml = _mTr(xml, 'ENDEREÇO:',              'ADDRESS:',              'DIRECCIÓN:');
+      xml = _mTr(xml, 'ATENÇÃO:',               'ATTN.:',                'ATN.:');
+      xml = _mTr(xml, 'FONE:',                  'PHONE:',                'TEL.:');
+      xml = _mTr(xml, 'TELEFONE:',              'PHONE:',                'TEL.:');
+      xml = _mTr(xml, 'E-MAIL:',                'E-MAIL:',               'E-MAIL:');
+      xml = _mTr(xml, 'C/C:',                   'C/C:',                  'C/C:');
+      xml = _mTr(xml, 'SEGMENTO:',              'SEGMENT:',              'SEGMENTO:');
+      xml = _mTr(xml, 'PRODUTO:',               'PRODUCT:',              'PRODUCTO:');
+      xml = _mTr(xml, 'MATERIAL:',              'MATERIAL:',             'MATERIAL:');
+      xml = _mTr(xml, 'DIMENSÕES:',             'DIMENSIONS:',           'DIMENSIONES:');
+      xml = _mTr(xml, 'GRANULOMETRIA:',         'GRANULOMETRY:',         'GRANULOMETRÍA:');
+      xml = _mTr(xml, 'MOAGEM A SECO:',         'DRY GRINDING:',         'MOLIENDA EN SECO:');
+      xml = _mTr(xml, 'FORMA DE ABASTECIMENTO:','FEEDING METHOD:',       'FORMA DE ABASTECIMIENTO:');
+      xml = _mTr(xml, 'PRODUÇÃO HORÁRIA:',      'HOURLY OUTPUT:',        'PRODUCCIÓN HORARIA:');
+      xml = _mTr(xml, 'VOLTAGEM:',              'VOLTAGE:',              'VOLTAJE:');
+      xml = _mTr(xml, 'CONDIÇÃO DE PAGAMENTO:', 'PAYMENT TERMS:',        'CONDICIONES DE PAGO:');
+      xml = _mTr(xml, 'PAGAMENTO:',             'PAYMENT TERMS:',        'CONDICIONES DE PAGO:');
+      xml = _mTr(xml, 'PRAZO DE ENTREGA:',      'DELIVERY TIME:',        'PLAZO DE ENTREGA:');
+      xml = _mTr(xml, 'PRAZO:',                 'DELIVERY TIME:',        'PLAZO DE ENTREGA:');
+      xml = _mTr(xml, 'FRETE:',                 'FREIGHT:',              'FLETE:');
+      xml = _mTr(xml, 'VALIDADE:',              'VALIDITY:',             'VALIDEZ:');
+      xml = _mTr(xml, 'VENDEDOR:',              'SALES REP.:',           'VENDEDOR:');
+      xml = _mTr(xml, 'SUBTOTAL',               'SUBTOTAL',              'SUBTOTAL');
+      xml = _mTr(xml, 'TOTAL GERAL',            'GRAND TOTAL',           'TOTAL GENERAL');
     }
     var itemRowsXml = _mkMaqItemRows(data.itens || []);
     xml = xml.replace(/<w:tr>[\s\S]*?##ITEM_ROWS##[\s\S]*?<\/w:tr>/, itemRowsXml);
