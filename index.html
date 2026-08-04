@@ -2675,13 +2675,18 @@ const CURRENCY_CACHE_KEY = 'seibt_currency_config_v1';
 
 /* ── Idioma do Orçamento ── */
 window._orcLang = 'PT';
+// Aba do Google Sheets conforme o idioma: PT → BD_PROP, EN/ES → BD_EXPORT
+window._orcAba = function() { return (window._orcLang && window._orcLang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP'; };
 var _ORC_LANG_DEFAULTS = {
   PT: { pagamento: '21 dias DDL.', prazo: '5 dias da confirmação do pedido', frete: 'Por conta do comprador.', validade: '5 dias' },
   EN: { pagamento: '30 days net.', prazo: '5 working days from order confirmation.', frete: "Buyer's responsibility.", validade: '5 days' },
   ES: { pagamento: '30 días neto.', prazo: '5 días hábiles desde la confirmación del pedido.', frete: 'A cargo del comprador.', validade: '5 días' }
 };
 window.setOrcLang = function(lang) {
+  // Trocar entre PT e EN/ES troca a aba de origem/destino no Sheets
+  var _abaAntes = window._orcAba();
   window._orcLang = lang;
+  var _trocouAba = (_abaAntes !== window._orcAba());
   ['PT','EN','ES'].forEach(function(l) {
     ['orc_lang_','orc_pen_lang_','orc_maq_lang_'].forEach(function(pfx) {
       var b = document.getElementById(pfx + l.toLowerCase());
@@ -2723,6 +2728,30 @@ window.setOrcLang = function(lang) {
       if (obsEl) obsEl.value = _navObsText(_jogo.qR, _jogo.qF, lang);
     }
     if (window._renderItens) window._renderItens();
+  }
+
+  // Mudou de mercado (nacional ⇄ exportação): recarrega dropdowns e nº
+  // da proposta a partir da aba correta, só no modal que estiver aberto.
+  if (_trocouAba) {
+    var _aberto = function(id) {
+      var m = document.getElementById(id);
+      return !!m && m.style.display !== 'none' && m.style.display !== '';
+    };
+    if (_aberto('orcamentoNavalhasModal')) {
+      if (window._fetchOpcoes)         window._fetchOpcoes();
+      if (window._fetchProximoNumero)  window._fetchProximoNumero();
+    }
+    if (_aberto('orcamentoPeneirasModal')) {
+      if (window._fetchPenOpcoes)          window._fetchPenOpcoes();
+      if (window._fetchPenProximoNumero)   window._fetchPenProximoNumero();
+    }
+    if (_aberto('orcamentoMaquinasModal')) {
+      if (window._carregarOpcoesMaq) window._carregarOpcoesMaq();
+      // Máquinas só sobrescreve o nº quando está vazio ou '---'
+      var _nMaq = document.getElementById('orc_maq_numero');
+      if (_nMaq && !window._orcMaqIsUpdate && !window._orcMaqNrFinalizado) _nMaq.value = '---';
+      if (window._fetchMaqProximoNumero) window._fetchMaqProximoNumero();
+    }
   }
 };
 
@@ -9026,7 +9055,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (atual) sel.value = atual;
   }
 
-  var ORC_OPCOES_CACHE_KEY = 'seibt_orc_opcoes_v1';
+  // Cache separado por mercado — nacional e exportação têm listas diferentes
+  function ORC_OPCOES_CACHE_KEY() { return 'seibt_orc_opcoes_v2_' + window._orcAba(); }
 
   function _aplicarOpcoes(op) {
     if (op.origem          && op.origem.length)          _popularSelect('orc_origem', op.origem);
@@ -9044,15 +9074,15 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
     // Aplicar cache imediatamente enquanto busca do GAS
     try {
-      var cached = JSON.parse(localStorage.getItem(ORC_OPCOES_CACHE_KEY) || 'null');
+      var cached = JSON.parse(localStorage.getItem(ORC_OPCOES_CACHE_KEY()) || 'null');
       if (cached) _aplicarOpcoes(cached);
     } catch(_) {}
 
-    window._gasJsonp('opcoes', {}, function(d) {
+    window._gasJsonp('opcoes', { aba: window._orcAba() }, function(d) {
       if (!d || !d.opcoes) return;
       var op = d.opcoes;
       // Salvar no cache para uso offline / file://
-      try { localStorage.setItem(ORC_OPCOES_CACHE_KEY, JSON.stringify(op)); } catch(_) {}
+      try { localStorage.setItem(ORC_OPCOES_CACHE_KEY(), JSON.stringify(op)); } catch(_) {}
       _aplicarOpcoes(op);
       var st = document.getElementById('orc_sheets_status');
       if (st && st.innerHTML.indexOf('') !== -1) st.innerHTML = ''; // limpar erro anterior
@@ -9060,7 +9090,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       console.error('[Sheets] _fetchOpcoes:', err);
       var st = document.getElementById('orc_sheets_status');
       try {
-        var cached = JSON.parse(localStorage.getItem(ORC_OPCOES_CACHE_KEY) || 'null');
+        var cached = JSON.parse(localStorage.getItem(ORC_OPCOES_CACHE_KEY()) || 'null');
         if (cached) {
           _aplicarOpcoes(cached);
           if (st) st.innerHTML = '<span style="color:#92400E;">Dropdowns do cache local (<button onclick="window._fetchOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#92400E;padding:0;font-size:inherit;">tentar novamente</button>)</span>';
@@ -9097,8 +9127,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       window[cbName] = function(data) { cleanup(); if (onSuccess) onSuccess(data); };
       script.onerror = function() { cleanup(); if (onError) onError(new Error('Falha ao carregar — verifique URL e permissão do GAS')); };
       setTimeout(function() {
-        if (!done) { cleanup(); if (onError) onError(new Error('Timeout 20s — verifique URL e permissão do GAS')); }
-      }, 20000);
+        if (!done) { cleanup(); if (onError) onError(new Error('Timeout 45s — verifique URL e permissão do GAS')); }
+      }, 45000);
       var qs = 'action=' + encodeURIComponent(action) + '&callback=' + cbName;
       Object.keys(params || {}).forEach(function(k) { qs += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); });
       document.body.appendChild(script);
@@ -10045,7 +10075,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     opcoes.forEach(function(op) { if (String(op).trim() === '') return; html += '<option value="' + String(op).replace(/"/g, '&quot;') + '">' + String(op) + '</option>'; });
     sel.innerHTML = html; if (atual) sel.value = atual;
   }
-  var PEN_OPCOES_CACHE_KEY = 'seibt_pen_opcoes_v1';
+  // Cache separado por mercado — nacional e exportação têm listas diferentes
+  function PEN_OPCOES_CACHE_KEY() { return 'seibt_pen_opcoes_v2_' + window._orcAba(); }
   function _fetchPenOpcoes() {
     var url = _getSheetsUrl(); if (!url) return;
     function _aplicarPen(op) {
@@ -10059,12 +10090,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (op.versao && op.versao.length)               _popularSelectPen('orc_pen_versao', op.versao);
     }
     try {
-      var cached = JSON.parse(localStorage.getItem(PEN_OPCOES_CACHE_KEY) || 'null');
+      var cached = JSON.parse(localStorage.getItem(PEN_OPCOES_CACHE_KEY()) || 'null');
       if (cached) _aplicarPen(cached);
     } catch(_) {}
-    window._gasJsonp('opcoes', {}, function(d) {
+    window._gasJsonp('opcoes', { aba: window._orcAba() }, function(d) {
       if (!d || !d.opcoes) return;
-      try { localStorage.setItem(PEN_OPCOES_CACHE_KEY, JSON.stringify(d.opcoes)); } catch(_) {}
+      try { localStorage.setItem(PEN_OPCOES_CACHE_KEY(), JSON.stringify(d.opcoes)); } catch(_) {}
       _aplicarPen(d.opcoes);
       var st = document.getElementById('orc_pen_sheets_status');
       if (st && st.innerHTML.indexOf('DC2626') !== -1) st.innerHTML = '';
@@ -10072,7 +10103,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       console.error('[Sheets] _fetchPenOpcoes:', err);
       var st = document.getElementById('orc_pen_sheets_status');
       try {
-        var cached = JSON.parse(localStorage.getItem(PEN_OPCOES_CACHE_KEY) || 'null');
+        var cached = JSON.parse(localStorage.getItem(PEN_OPCOES_CACHE_KEY()) || 'null');
         if (cached) { _aplicarPen(cached); if (st) st.innerHTML = '<span style="color:#92400E;">Dropdowns do cache local (<button onclick="window._fetchPenOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#92400E;padding:0;font-size:inherit;">tentar novamente</button>)</span>'; return; }
       } catch(_) {}
       if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram. <button onclick="window._fetchPenOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#DC2626;padding:0;font-size:inherit;">Tentar novamente</button></span>';
@@ -10095,6 +10126,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var descricao = data.itens.map(function(it) { return it.descricao + (it.cod ? ' COD.' + it.cod : ''); }).join('; ');
     var rep = data.representante || data.vendedor || '';
     var payload = JSON.stringify({
+      aba: (data.lang && data.lang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP',
       nrProposta: data.numero || '', origem: data.origem || '', dataAbertura: data.data || '', mes: mes,
       representante: rep, interno: data.interno || '', responsavel: rep, nomeCliente: data.cliente || '',
       cidade: data.cidade || '', uf: data.estado || '', eCliente: data.eCliente || '', tipoMercado: data.tipoMercado || '',
@@ -10723,7 +10755,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     });
   };
 
-  var MAQ_OPCOES_CACHE_KEY = 'seibt_maq_opcoes_v1';
+  // Cache separado por mercado — nacional e exportação têm listas diferentes
+  function MAQ_OPCOES_CACHE_KEY() { return 'seibt_maq_opcoes_v2_' + window._orcAba(); }
   function _carregarOpcoesMaq() {
     var url = window._getSheetsUrl ? window._getSheetsUrl() : null; if (!url) return;
     function _aplicarMaq(op) {
@@ -10737,19 +10770,19 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (op.versao        && op.versao.length)        _popularSelectMaq('orc_maq_versao',        op.versao);
     }
     try {
-      var cached = JSON.parse(localStorage.getItem(MAQ_OPCOES_CACHE_KEY) || 'null');
+      var cached = JSON.parse(localStorage.getItem(MAQ_OPCOES_CACHE_KEY()) || 'null');
       if (cached) _aplicarMaq(cached);
     } catch(_) {}
-    window._gasJsonp('opcoes', {}, function(d) {
+    window._gasJsonp('opcoes', { aba: window._orcAba() }, function(d) {
       if (!d || !d.opcoes) return;
-      try { localStorage.setItem(MAQ_OPCOES_CACHE_KEY, JSON.stringify(d.opcoes)); } catch(_) {}
+      try { localStorage.setItem(MAQ_OPCOES_CACHE_KEY(), JSON.stringify(d.opcoes)); } catch(_) {}
       _aplicarMaq(d.opcoes);
       var stEl = document.getElementById('orc_maq_sheets_status');
       if (stEl && stEl.innerHTML.indexOf('DC2626') !== -1) stEl.innerHTML = '';
     }, function() {
       var stEl = document.getElementById('orc_maq_sheets_status');
       try {
-        var cached = JSON.parse(localStorage.getItem(MAQ_OPCOES_CACHE_KEY) || 'null');
+        var cached = JSON.parse(localStorage.getItem(MAQ_OPCOES_CACHE_KEY()) || 'null');
         if (cached) { _aplicarMaq(cached); if (stEl) stEl.innerHTML = '<span style="color:#92400E;font-size:0.71rem;">Cache local (<button onclick="window._carregarOpcoesMaq()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#92400E;padding:0;font-size:inherit;">atualizar</button>)</span>'; return; }
       } catch(_) {}
       if (stEl) stEl.innerHTML = '<span style="color:#DC2626;font-size:0.71rem;">Sheets indispon&#237;vel. <button onclick="window._carregarOpcoesMaq()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#DC2626;padding:0;font-size:inherit;">Tentar novamente</button></span>';
@@ -10766,6 +10799,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var subtotal = calcSubtotal() + calcIPITotal();
     function gvM(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
     var payload = JSON.stringify({
+      aba:             window._orcAba(),
       nrProposta:      data.numero||'',
       origem:          gvM('orc_maq_origem'),
       dataAbertura:    data.data||'',
