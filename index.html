@@ -2704,16 +2704,24 @@ window.setOrcLang = function(lang) {
   if (window._orcItens && window._orcItens.length > 0) {
     var _dr = window.DOLLAR_RATE || 4.80;
     window._orcItens.forEach(function(it) {
-      if (!it._navType) return;
-      if (!it._navHasOverride) {
+      // Descrição traduzida apenas para itens de navalha gerados automaticamente
+      if (it._navType && !it._navHasOverride) {
         it.descricao = _navDefaultDesc(it._navType, it._navMod, it._navSuf, lang);
       }
+      // Preço e IPI: vale para todos os itens (inclusive adicionados manualmente)
+      if (it._valor_brl === undefined) it._valor_brl = parseFloat(it.valor_unit) || 0;
+      if (it._ipi_orig  === undefined) it._ipi_orig  = parseFloat(it.ipi) || 0;
       it.valor_unit = (lang === 'PT') ? it._valor_brl : Math.round((it._valor_brl / _dr) * 100) / 100;
-      it.ipi = (lang === 'PT') ? (it._ipi_orig || 5.20) : 0;
+      it.ipi        = (lang === 'PT') ? it._ipi_orig  : 0;
     });
-    var _jogo = window._orcNavJogo || { qR: 0, qF: 0 };
-    var obsEl = document.getElementById('orc_obs');
-    if (obsEl) obsEl.value = _navObsText(_jogo.qR, _jogo.qF, lang);
+    // OBS só é reescrita quando o orçamento tem itens de navalha automáticos;
+    // caso contrário preserva o que o vendedor digitou.
+    var _temNav = window._orcItens.some(function(it){ return !!it._navType; });
+    if (_temNav) {
+      var _jogo = window._orcNavJogo || { qR: 0, qF: 0 };
+      var obsEl = document.getElementById('orc_obs');
+      if (obsEl) obsEl.value = _navObsText(_jogo.qR, _jogo.qF, lang);
+    }
     if (window._renderItens) window._renderItens();
   }
 };
@@ -8832,12 +8840,26 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     _atualizaTotais();
   }
 
-  window._orcUpdate = function(i, f, v) { _itens[i][f] = v; _renderItens(); };
+  window._orcUpdate = function(i, f, v) {
+    _itens[i][f] = v;
+    // Mantém o valor-base em BRL sincronizado: em EN/ES o campo mostra USD,
+    // então converte de volta para guardar a referência em reais.
+    if (f === 'valor_unit') {
+      var _l = window._orcLang || 'PT';
+      var _n = parseFloat(v) || 0;
+      _itens[i]._valor_brl = (_l === 'PT') ? _n : Math.round(_n * (window.DOLLAR_RATE || 4.80) * 100) / 100;
+    }
+    if (f === 'ipi' && (window._orcLang || 'PT') === 'PT') _itens[i]._ipi_orig = parseFloat(v) || 0;
+    _renderItens();
+  };
   window._orcRemove = function(i) { _itens.splice(i, 1); _renderItens(); };
   window._orcDup    = function(i) { _itens.push(Object.assign({}, _itens[i])); _renderItens(); };
 
   window.addOrcamentoItem = function() {
-    _itens.push({ descricao: '', cod: '', qtd: 1, valor_unit: 0, ipi: 5.20, desconto: 0 });
+    var _l = window._orcLang || 'PT';
+    _itens.push({ descricao: '', cod: '', qtd: 1, valor_unit: 0,
+                  ipi: (_l === 'PT' ? 5.20 : 0), desconto: 0,
+                  _valor_brl: 0, _ipi_orig: 5.20 });
     _renderItens();
   };
 
@@ -9041,13 +9063,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         var cached = JSON.parse(localStorage.getItem(ORC_OPCOES_CACHE_KEY) || 'null');
         if (cached) {
           _aplicarOpcoes(cached);
-          if (st) st.innerHTML = '<span style="color:#92400E;">Dropdowns do cache local (abra via navegador web para atualizar)</span>';
+          if (st) st.innerHTML = '<span style="color:#92400E;">Dropdowns do cache local (<button onclick="window._fetchOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#92400E;padding:0;font-size:inherit;">tentar novamente</button>)</span>';
           return;
         }
       } catch(_) {}
-      if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram: ' + (err.message || 'erro') + '</span>';
+      if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram. <button onclick="window._fetchOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#DC2626;padding:0;font-size:inherit;">Tentar novamente</button></span>';
     });
   }
+  window._fetchOpcoes = _fetchOpcoes;
 
   window.configurarGoogleSheets = function() {
     var url = prompt('Cole aqui a URL do Google Apps Script:\n(Extensions → Apps Script → Deploy → Web App)', _getSheetsUrl());
@@ -10022,24 +10045,40 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     opcoes.forEach(function(op) { if (String(op).trim() === '') return; html += '<option value="' + String(op).replace(/"/g, '&quot;') + '">' + String(op) + '</option>'; });
     sel.innerHTML = html; if (atual) sel.value = atual;
   }
+  var PEN_OPCOES_CACHE_KEY = 'seibt_pen_opcoes_v1';
   function _fetchPenOpcoes() {
     var url = _getSheetsUrl(); if (!url) return;
+    function _aplicarPen(op) {
+      if (op.origem && op.origem.length)               _popularSelectPen('orc_pen_origem', op.origem);
+      if (op.eCliente && op.eCliente.length)           _popularSelectPen('orc_pen_ecliente', op.eCliente);
+      if (op.representante && op.representante.length) _popularSelectPen('orc_pen_representante', op.representante);
+      if (op.interno && op.interno.length)             _popularSelectPen('orc_pen_interno', op.interno);
+      if (op.tipoMercado && op.tipoMercado.length)     _popularSelectPen('orc_pen_tipomercado', op.tipoMercado);
+      if (op.classificacao && op.classificacao.length) _popularSelectPen('orc_pen_classificacao', op.classificacao);
+      if (op.modelo && op.modelo.length)               _popularSelectPen('orc_pen_modelo', op.modelo);
+      if (op.versao && op.versao.length)               _popularSelectPen('orc_pen_versao', op.versao);
+    }
+    try {
+      var cached = JSON.parse(localStorage.getItem(PEN_OPCOES_CACHE_KEY) || 'null');
+      if (cached) _aplicarPen(cached);
+    } catch(_) {}
     window._gasJsonp('opcoes', {}, function(d) {
-        if (!d || !d.opcoes) return; var op = d.opcoes;
-        if (op.origem && op.origem.length)               _popularSelectPen('orc_pen_origem', op.origem);
-        if (op.eCliente && op.eCliente.length)           _popularSelectPen('orc_pen_ecliente', op.eCliente);
-        if (op.representante && op.representante.length) _popularSelectPen('orc_pen_representante', op.representante);
-        if (op.interno && op.interno.length)             _popularSelectPen('orc_pen_interno', op.interno);
-        if (op.tipoMercado && op.tipoMercado.length)     _popularSelectPen('orc_pen_tipomercado', op.tipoMercado);
-        if (op.classificacao && op.classificacao.length) _popularSelectPen('orc_pen_classificacao', op.classificacao);
-        if (op.modelo && op.modelo.length)               _popularSelectPen('orc_pen_modelo', op.modelo);
-        if (op.versao && op.versao.length)               _popularSelectPen('orc_pen_versao', op.versao);
+      if (!d || !d.opcoes) return;
+      try { localStorage.setItem(PEN_OPCOES_CACHE_KEY, JSON.stringify(d.opcoes)); } catch(_) {}
+      _aplicarPen(d.opcoes);
+      var st = document.getElementById('orc_pen_sheets_status');
+      if (st && st.innerHTML.indexOf('DC2626') !== -1) st.innerHTML = '';
     }, function(err) {
       console.error('[Sheets] _fetchPenOpcoes:', err);
       var st = document.getElementById('orc_pen_sheets_status');
-      if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram: ' + (err.message || 'erro') + '</span>';
+      try {
+        var cached = JSON.parse(localStorage.getItem(PEN_OPCOES_CACHE_KEY) || 'null');
+        if (cached) { _aplicarPen(cached); if (st) st.innerHTML = '<span style="color:#92400E;">Dropdowns do cache local (<button onclick="window._fetchPenOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#92400E;padding:0;font-size:inherit;">tentar novamente</button>)</span>'; return; }
+      } catch(_) {}
+      if (st) st.innerHTML = '<span style="color:#DC2626;">Dropdowns não carregaram. <button onclick="window._fetchPenOpcoes()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#DC2626;padding:0;font-size:inherit;">Tentar novamente</button></span>';
     });
   }
+  window._fetchPenOpcoes = _fetchPenOpcoes;
   window.configurarGoogleSheetsPen = function() {
     var url = prompt('Cole aqui a URL do Google Apps Script:\n(Extensions → Apps Script → Deploy → Web App)', _getSheetsUrl());
     if (url === null) return;
@@ -10684,11 +10723,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     });
   };
 
+  var MAQ_OPCOES_CACHE_KEY = 'seibt_maq_opcoes_v1';
   function _carregarOpcoesMaq() {
     var url = window._getSheetsUrl ? window._getSheetsUrl() : null; if (!url) return;
-    window._gasJsonp('opcoes', {}, function(d) {
-      if (!d || !d.opcoes) return;
-      var op = d.opcoes;
+    function _aplicarMaq(op) {
       if (op.origem        && op.origem.length)        _popularSelectMaq('orc_maq_origem',        op.origem);
       if (op.eCliente      && op.eCliente.length)      _popularSelectMaq('orc_maq_ecliente',      op.eCliente);
       if (op.representante && op.representante.length) _popularSelectMaq('orc_maq_representante', op.representante);
@@ -10697,11 +10735,27 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (op.classificacao && op.classificacao.length) _popularSelectMaq('orc_maq_classificacao', op.classificacao);
       if (op.modelo        && op.modelo.length)        _popularSelectMaq('orc_maq_modelo',        op.modelo);
       if (op.versao        && op.versao.length)        _popularSelectMaq('orc_maq_versao',        op.versao);
+    }
+    try {
+      var cached = JSON.parse(localStorage.getItem(MAQ_OPCOES_CACHE_KEY) || 'null');
+      if (cached) _aplicarMaq(cached);
+    } catch(_) {}
+    window._gasJsonp('opcoes', {}, function(d) {
+      if (!d || !d.opcoes) return;
+      try { localStorage.setItem(MAQ_OPCOES_CACHE_KEY, JSON.stringify(d.opcoes)); } catch(_) {}
+      _aplicarMaq(d.opcoes);
+      var stEl = document.getElementById('orc_maq_sheets_status');
+      if (stEl && stEl.innerHTML.indexOf('DC2626') !== -1) stEl.innerHTML = '';
     }, function() {
       var stEl = document.getElementById('orc_maq_sheets_status');
-      if (stEl) stEl.innerHTML = '<span style="color:#DC2626;font-size:0.71rem;">Sheets indispon&#237;vel</span>';
+      try {
+        var cached = JSON.parse(localStorage.getItem(MAQ_OPCOES_CACHE_KEY) || 'null');
+        if (cached) { _aplicarMaq(cached); if (stEl) stEl.innerHTML = '<span style="color:#92400E;font-size:0.71rem;">Cache local (<button onclick="window._carregarOpcoesMaq()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#92400E;padding:0;font-size:inherit;">atualizar</button>)</span>'; return; }
+      } catch(_) {}
+      if (stEl) stEl.innerHTML = '<span style="color:#DC2626;font-size:0.71rem;">Sheets indispon&#237;vel. <button onclick="window._carregarOpcoesMaq()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:#DC2626;padding:0;font-size:inherit;">Tentar novamente</button></span>';
     });
   }
+  window._carregarOpcoesMaq = _carregarOpcoesMaq;
 
   function _enviarParaSheetsMaq(data) {
     var url = window._getSheetsUrl ? window._getSheetsUrl() : null; if (!url) return;
