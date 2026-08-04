@@ -2700,7 +2700,46 @@ window.setOrcLang = function(lang) {
     var el = document.getElementById(id);
     if (el) el.value = d[id.split('_').pop()] || d[id.replace(/orc_(?:pen_|maq_)?/,'')] || '';
   });
+  // Atualiza itens de navalhas: descrição no idioma, preço em USD ou BRL, IPI zerado na exportação
+  if (window._orcItens && window._orcItens.length > 0) {
+    var _dr = window.DOLLAR_RATE || 4.80;
+    window._orcItens.forEach(function(it) {
+      if (!it._navType) return;
+      if (!it._navHasOverride) {
+        it.descricao = _navDefaultDesc(it._navType, it._navMod, it._navSuf, lang);
+      }
+      it.valor_unit = (lang === 'PT') ? it._valor_brl : Math.round((it._valor_brl / _dr) * 100) / 100;
+      it.ipi = (lang === 'PT') ? (it._ipi_orig || 5.20) : 0;
+    });
+    var _jogo = window._orcNavJogo || { qR: 0, qF: 0 };
+    var obsEl = document.getElementById('orc_obs');
+    if (obsEl) obsEl.value = _navObsText(_jogo.qR, _jogo.qF, lang);
+    if (window._renderItens) window._renderItens();
+  }
 };
+
+function _navDefaultDesc(tipo, modelo, suf, lang) {
+  var base = tipo === 'rotora'
+    ? (lang === 'EN' ? 'ROTARY BLADE IN VND STEEL ' : lang === 'ES' ? 'CUCHILLA ROTORA EN ACERO VND ' : 'NAVALHA ROTORA EM AÇO VND ')
+    : (lang === 'EN' ? 'FIXED BLADE IN VND STEEL ' : lang === 'ES' ? 'CUCHILLA FIJA EN ACERO VND ' : 'NAVALHA FIXA EM AÇO VND ');
+  return base + modelo + (suf || '');
+}
+
+function _navObsText(qR, qF, lang) {
+  var jogo = (qR > 0 && qF > 0)
+    ? (lang === 'EN'
+        ? 'NOTE: 1 SET CONSISTS OF ' + qR + ' ROTARY BLADES AND ' + qF + ' FIXED BLADES'
+        : lang === 'ES'
+        ? 'OBS: 1 JUEGO COMPUESTO POR ' + qR + ' CUCHILLAS ROTORAS Y ' + qF + ' FIJAS'
+        : 'OBS: 01 JOGO É COMPOSTO POR ' + qR + ' NAVALHAS ROTORAS E ' + qF + ' FIXAS')
+    : '';
+  var mat = lang === 'EN'
+    ? 'Material: special steel O1 (VND), heat treated, tempered and ground.\nProvides high wear resistance, cutting stability and longer service life.'
+    : lang === 'ES'
+    ? 'Material: acero especial O1 (VND), con tratamiento térmico, revenido y rectificado.\nProporciona alta resistencia al desgaste, estabilidad de corte y mayor vida útil.'
+    : 'Material: aço especial O1 (VND), com tratamento térmico, revenido e retificado.\nProporciona elevada resistência ao desgaste, estabilidade de corte e maior vida útil.';
+  return jogo ? jogo + '\n\n' + mat : mat;
+}
 
 let MACHINES = [
   {"modelo": "MGHS 200 LR", "descricao": "2 CV C/ GAVETA", "valor_maq": 40907, "valor_p220": 13017, "valor_p380": 0, "linha": "LR", "imagem": "https://via.placeholder.com/400x200?text=Exemplo+Foto"},
@@ -4507,6 +4546,30 @@ function setupRealtimeSync() {
 // Iniciar sincronização após carregar dados iniciais
 setTimeout(() => setupRealtimeSync(), 1000);
 
+// Migração única: remove overrides antigos de descrição de navalha (sem "AÇO VND")
+// para que o padrão novo ("EM AÇO VND") passe a vigorar para todos os usuários.
+async function _migrateNavDescriptions() {
+  var _migKey = 'seibt_nav_desc_aco_vnd_v1';
+  if (localStorage.getItem(_migKey)) return;
+  localStorage.setItem(_migKey, '1');
+  if (!window.EXTRA_OVERRIDES || !window.EXTRA_OVERRIDES.navalhas) return;
+  var _changed = false;
+  Object.keys(window.EXTRA_OVERRIDES.navalhas).forEach(function(key) {
+    var ov = window.EXTRA_OVERRIDES.navalhas[key];
+    if (!ov) return;
+    ['descricao_rot','descricao_fixa','descricao'].forEach(function(f) {
+      if (ov[f] !== undefined && String(ov[f]).indexOf('AÇO VND') === -1) {
+        delete ov[f];
+        _changed = true;
+      }
+    });
+  });
+  if (_changed) {
+    localStorage.setItem('seibt_extra_overrides_v1', JSON.stringify(window.EXTRA_OVERRIDES));
+    try { if (isAdminUnlockedSync()) await saveAllToCloud(); } catch(e) {}
+  }
+}
+
 // Polling de fallback: re-sincroniza EXTRA_OVERRIDES a cada 2 minutos
 // Garante que descrições e demais overrides cheguem a todos os usuários
 // mesmo quando o Realtime do Supabase tem atraso ou perde eventos.
@@ -4522,6 +4585,7 @@ async function _syncExtraOverrides() {
       localStorage.setItem('seibt_extra_overrides_v1', JSON.stringify(EXTRA_OVERRIDES));
       render();
     }
+    await _migrateNavDescriptions();
   } catch(e) { /* silencioso */ }
 }
 setInterval(_syncExtraOverrides, 2 * 60 * 1000);
@@ -8122,8 +8186,8 @@ async function resetItemEdit() {
         }
       }
       if (nav) {
-        var descRot  = (ov_old && ov_old.descricao_rot)  ? ov_old.descricao_rot  : (ov_old && ov_old.descricao ? ov_old.descricao : (nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA ' + nav.modelo.trim())));
-        var descFixa = (ov_old && ov_old.descricao_fixa) ? ov_old.descricao_fixa : (nav.descricao_fixa || ('NAVALHA FIXA ' + nav.modelo.trim()));
+        var descRot  = (ov_old && ov_old.descricao_rot)  ? ov_old.descricao_rot  : (ov_old && ov_old.descricao ? ov_old.descricao : (nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA EM AÇO VND ' + nav.modelo.trim())));
+        var descFixa = (ov_old && ov_old.descricao_fixa) ? ov_old.descricao_fixa : (nav.descricao_fixa || ('NAVALHA FIXA EM AÇO VND ' + nav.modelo.trim()));
         if (qtdeRot > 0) {
           var codsRot = codRot ? codRot.split('/').map(function(s){return s.trim();}).filter(Boolean) : [''];
           var sufRot = codsRot.length >= 2 ? [' ESQ',' DIR'] : [''];
@@ -8717,6 +8781,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var ei = document.getElementById('orc_ipi_total'); if (ei) ei.textContent = _fmtBRL(ipi);
     var et = document.getElementById('orc_total');     if (et) et.textContent = _fmtBRL(tot);
   }
+  window._atualizaTotais = _atualizaTotais;
 
   window._renderItens = function _renderItens() {
     var c = document.getElementById('orc_itens_container');
@@ -8826,8 +8891,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var cR = (nav.cod_rot  && String(nav.cod_rot).trim()  !== '/' && String(nav.cod_rot).trim()  !== '') ? String(nav.cod_rot)  : '';
     var _eqR1 = ov.qtde_rot  !== undefined ? parseFloat(ov.qtde_rot)  : parseFloat(nav.qtde_rot  || 0);
     var _eqF1 = ov.qtde_fixa !== undefined ? parseFloat(ov.qtde_fixa) : parseFloat(nav.qtde_fixa || 0);
-    var _rotB1 = ov.descricao_rot  || ov.descricao || nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA ' + nav.modelo.trim());
-    var _fixB1 = ov.descricao_fixa || nav.descricao_fixa || ('NAVALHA FIXA ' + nav.modelo.trim());
+    var _rotB1 = ov.descricao_rot  || ov.descricao || nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA EM AÇO VND ' + nav.modelo.trim());
+    var _fixB1 = ov.descricao_fixa || nav.descricao_fixa || ('NAVALHA FIXA EM AÇO VND ' + nav.modelo.trim());
     if (_eqR1 > 0) { var _cRs1 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR1 = _cRs1.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs1.forEach(function(c,i){ _itens.push({ descricao: _rotB1 + (_sufR1[i]||''), cod: c, qtd: _eqR1, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
     if (_eqF1 > 0) { var _cFs1 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs1.forEach(function(c){ _itens.push({ descricao: _fixB1, cod: c, qtd: _eqF1, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
     var panel = document.getElementById('orc_modelo_selector');
@@ -8873,12 +8938,16 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         var _ov2 = isNewNav ? {} : ((window.EXTRA_OVERRIDES && window.EXTRA_OVERRIDES.navalhas || {})['nav_' + navIdx] || {});
         var _eqR2 = _ov2.qtde_rot  !== undefined ? parseFloat(_ov2.qtde_rot)  : parseFloat(nav.qtde_rot  || 0);
         var _eqF2 = _ov2.qtde_fixa !== undefined ? parseFloat(_ov2.qtde_fixa) : parseFloat(nav.qtde_fixa || 0);
-        var _rotB2 = _ov2.descricao_rot  || _ov2.descricao || nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA ' + nav.modelo.trim());
-        var _fixB2 = _ov2.descricao_fixa || nav.descricao_fixa || ('NAVALHA FIXA ' + nav.modelo.trim());
-        if (_eqR2 > 0) { var _cRs2 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR2 = _cRs2.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs2.forEach(function(c,i){ _itens.push({ descricao: _rotB2 + (_sufR2[i]||''), cod: c, qtd: _eqR2, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
-        if (_eqF2 > 0) { var _cFs2 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs2.forEach(function(c){ _itens.push({ descricao: _fixB2, cod: c, qtd: _eqF2, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
+        var _rotB2 = _ov2.descricao_rot  || _ov2.descricao || nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA EM AÇO VND ' + nav.modelo.trim());
+        var _fixB2 = _ov2.descricao_fixa || nav.descricao_fixa || ('NAVALHA FIXA EM AÇO VND ' + nav.modelo.trim());
+        var _hasOvRot2 = !!(_ov2.descricao_rot || _ov2.descricao);
+        var _hasOvFix2 = !!_ov2.descricao_fixa;
+        if (_eqR2 > 0) { var _cRs2 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR2 = _cRs2.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs2.forEach(function(c,i){ _itens.push({ descricao: _rotB2 + (_sufR2[i]||''), cod: c, qtd: _eqR2, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true, _valor_brl: vR, _ipi_orig: 5.20, _navType: 'rotora', _navMod: nav.modelo.trim(), _navSuf: _sufR2[i]||'', _navHasOverride: _hasOvRot2 }); }); }
+        if (_eqF2 > 0) { var _cFs2 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs2.forEach(function(c){ _itens.push({ descricao: _fixB2, cod: c, qtd: _eqF2, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true, _valor_brl: vF, _ipi_orig: 5.20, _navType: 'fixa', _navMod: nav.modelo.trim(), _navSuf: '', _navHasOverride: _hasOvFix2 }); }); }
         var qR = Math.round(_eqR2)||0, qF = Math.round(_eqF2)||0;
-        if (qR > 0 && qF > 0) obsText = 'OBS: 01 JOGO E COMPOSTO POR ' + qR + ' NAVALHAS ROTORAS E ' + qF + ' FIXAS';
+        window._orcNavJogo = { qR: qR, qF: qF };
+        var _lObs = window._orcLang || 'PT';
+        obsText = _navObsText(qR, qF, _lObs);
       }
     } catch(e) {}
     _setVal('orc_data',     _hoje());
@@ -9166,12 +9235,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       versao_crm:     _gv('orc_versao'),
       lang: window._orcLang || 'PT',
       itens: window._orcItens.map(function(it) {
-        var vUnit = parseFloat(it.valor_unit)||0;
-        var lang = window._orcLang || 'PT';
-        if (lang !== 'PT' && vUnit > 0) vUnit = Math.round((vUnit / (window.DOLLAR_RATE||4.80)) * 100) / 100;
         return {
           descricao: it.descricao||'', cod: it.cod||'',
-          qtd: parseFloat(it.qtd)||0, valor_unit: vUnit,
+          qtd: parseFloat(it.qtd)||0, valor_unit: parseFloat(it.valor_unit)||0,
           ipi: parseFloat(it.ipi)||0, total: _calcTotal(it), readonly: !!it.readonly
         };
       })
@@ -9837,8 +9903,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var cR   = (nav.cod_rot  && String(nav.cod_rot).trim()  !== '/' && String(nav.cod_rot).trim()  !== '') ? String(nav.cod_rot)  : '';
     var _eqR3 = ov.qtde_rot  !== undefined ? parseFloat(ov.qtde_rot)  : parseFloat(nav.qtde_rot  || 0);
     var _eqF3 = ov.qtde_fixa !== undefined ? parseFloat(ov.qtde_fixa) : parseFloat(nav.qtde_fixa || 0);
-    var _rotB3 = ov.descricao_rot  || ov.descricao || nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA ' + nav.modelo.trim());
-    var _fixB3 = ov.descricao_fixa || nav.descricao_fixa || ('NAVALHA FIXA ' + nav.modelo.trim());
+    var _rotB3 = ov.descricao_rot  || ov.descricao || nav.descricao_rot  || nav.descricao  || ('NAVALHA ROTORA EM AÇO VND ' + nav.modelo.trim());
+    var _fixB3 = ov.descricao_fixa || nav.descricao_fixa || ('NAVALHA FIXA EM AÇO VND ' + nav.modelo.trim());
     if (_eqR3 > 0) { var _cRs3 = cR ? cR.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; var _sufR3 = _cRs3.length >= 2 ? [' ESQ',' DIR'] : ['']; _cRs3.forEach(function(c,i){ _itens.push({ descricao: _rotB3 + (_sufR3[i]||''), cod: c, qtd: _eqR3, valor_unit: vR, ipi: 5.20, desconto: 0, readonly: true }); }); }
     if (_eqF3 > 0) { var _cFs3 = cF ? cF.split('/').map(function(s){return s.trim();}).filter(Boolean) : ['']; _cFs3.forEach(function(c){ _itens.push({ descricao: _fixB3, cod: c, qtd: _eqF3, valor_unit: vF, ipi: 5.20, desconto: 0, readonly: true }); }); }
     var panel = document.getElementById('orc_pen_nav_selector');
@@ -11595,8 +11661,8 @@ function openInlineEditNavalha(idx) {
   document.getElementById('ienav_cod_rot').value   = ov.cod_rot   !== undefined ? ov.cod_rot   : (n.cod_rot   || '');
   document.getElementById('ienav_qtde_rot').value  = ov.qtde_rot  !== undefined ? ov.qtde_rot  : (n.qtde_rot  || '');
   document.getElementById('ienav_valor_rot').value = ov.valor_rot !== undefined ? ov.valor_rot : (n.valor_rot || '');
-  document.getElementById('ienav_descricao_rot').value  = ov.descricao_rot  !== undefined ? ov.descricao_rot  : (ov.descricao || n.descricao_rot  || n.descricao  || ('NAVALHA ROTORA ' + _navModelo.trim()));
-  document.getElementById('ienav_descricao_fixa').value = ov.descricao_fixa !== undefined ? ov.descricao_fixa : (n.descricao_fixa || ('NAVALHA FIXA '   + _navModelo.trim()));
+  document.getElementById('ienav_descricao_rot').value  = ov.descricao_rot  !== undefined ? ov.descricao_rot  : (ov.descricao || n.descricao_rot  || n.descricao  || ('NAVALHA ROTORA EM AÇO VND ' + _navModelo.trim()));
+  document.getElementById('ienav_descricao_fixa').value = ov.descricao_fixa !== undefined ? ov.descricao_fixa : (n.descricao_fixa || ('NAVALHA FIXA EM AÇO VND '   + _navModelo.trim()));
   var overlay = document.getElementById('inlineEditNavalhaOverlay');
   overlay.classList.add('active');
   if (typeof trapFocus === 'function') trapFocus(overlay);
