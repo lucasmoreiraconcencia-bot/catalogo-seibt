@@ -13249,12 +13249,44 @@ function _sanitizePastedHtml(html) {
     .replace(/(<br>\s*){3,}/gi, '<br><br>');
 }
 
+// Detecta a tabela "Especificações Técnicas" (característica | valor) dentro
+// do HTML colado do Word e preenche automaticamente o editor de
+// Especificações Técnicas do formulário (TEMP_SPECS_DATA). É esse editor —
+// não o texto colado — que a geração do orçamento usa para desenhar a
+// tabela com bordas igual ao Word (função mkSpecsTable). A tabela é então
+// removida do texto colado para não aparecer duplicada como texto solto.
+function _extrairEspecificacoesTecnicas(container) {
+  var achouAlguma = false;
+  Array.prototype.forEach.call(container.querySelectorAll('table'), function(table) {
+    var rows = Array.prototype.slice.call(table.querySelectorAll('tr'));
+    if (!rows.length || !/^especifica/i.test((rows[0].textContent || '').trim())) return;
+    var achouNestaTabela = false;
+    for (var i = 1; i < rows.length; i++) {
+      var cells = rows[i].querySelectorAll('td, th');
+      if (cells.length < 2) continue;
+      var chave = (cells[0].textContent || '').replace(/\s+/g, ' ').trim();
+      var valor = (cells[1].textContent || '').replace(/\s+/g, ' ').trim();
+      if (!chave) continue;
+      TEMP_SPECS_DATA[chave] = valor;
+      achouNestaTabela = true;
+    }
+    if (achouNestaTabela) { achouAlguma = true; table.parentNode.removeChild(table); }
+  });
+  if (achouAlguma) {
+    if (typeof renderSpecsEditor === 'function') renderSpecsEditor();
+    if (typeof showToast === 'function') showToast('Especificações Técnicas preenchidas automaticamente a partir da tabela colada', 'success');
+  }
+}
+
 window._descEditorPaste = function(e) {
   e.preventDefault();
   var cd = e.clipboardData || window.clipboardData;
   var html = cd ? cd.getData('text/html') : '';
   if (html) {
-    document.execCommand('insertHTML', false, _sanitizePastedHtml(html));
+    var pre = document.createElement('div');
+    pre.innerHTML = html;
+    _extrairEspecificacoesTecnicas(pre);
+    document.execCommand('insertHTML', false, _sanitizePastedHtml(pre.innerHTML));
   } else {
     var text = (cd ? cd.getData('text/plain') : '') || '';
     var asHtml = text.split(/\r\n|\r|\n/).map(function(l) {
