@@ -1342,7 +1342,7 @@ body.admin-mode .add-equip-fab { display: flex; align-items: center; justify-con
 .edit-modal-overlay.active { display: flex; }
 .edit-modal-box {
   background: white; border-radius: var(--radius); padding: 1.5rem;
-  max-width: 500px; width: 100%; margin: 2rem auto;
+  max-width: 820px; width: 100%; margin: 2rem auto;
   box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 .edit-modal-box h3 {
@@ -2687,6 +2687,11 @@ window.setOrcLang = function(lang) {
   var _abaAntes = window._orcAba();
   window._orcLang = lang;
   var _trocouAba = (_abaAntes !== window._orcAba());
+  // Campo "País": só aparece em EN/ES (exportação); some em PT (nacional)
+  ['orc_pais_wrap', 'orc_pen_pais_wrap', 'orc_maq_pais_wrap'].forEach(function(id) {
+    var w = document.getElementById(id);
+    if (w) w.style.display = (lang === 'PT') ? 'none' : '';
+  });
   ['PT','EN','ES'].forEach(function(l) {
     ['orc_lang_','orc_pen_lang_','orc_maq_lang_'].forEach(function(pfx) {
       var b = document.getElementById(pfx + l.toLowerCase());
@@ -8605,6 +8610,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Estado</label>
             <input id="orc_estado" type="text" placeholder="SP" style="width:100%;padding:0.55rem 0.7rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;font-size:0.88rem;box-sizing:border-box;">
           </div>
+          <div id="orc_pais_wrap" style="display:none;">
+            <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">País</label>
+            <input id="orc_pais" type="text" placeholder="México" style="width:100%;padding:0.55rem 0.7rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;font-size:0.88rem;box-sizing:border-box;">
+          </div>
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Atenção (Contato)</label>
             <input id="orc_atencao" type="text" placeholder="Sr. Nome do Contato" style="width:100%;padding:0.55rem 0.7rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;font-size:0.88rem;box-sizing:border-box;">
@@ -9202,6 +9211,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       nomeCliente:     data.cliente     || '',
       cidade:          data.cidade      || '',
       uf:              data.estado      || '',
+      pais:            (document.getElementById('orc_pais') || {}).value || '',
       eCliente:        data.eCliente    || '',
       tipoMercado:     data.tipoMercado || '',
       classificacao:   data.classificacao || '',
@@ -9217,7 +9227,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var b64 = btoa(unescape(encodeURIComponent(payload)));
     // Usar JSONP via <script> para salvar (fetch bloqueado de file://)
     window._gasJsonp('save', { d: b64 }, function(resp) {
-      if (resp && resp.ok) {
+      if (resp && resp.ok && resp.erro) {
+        if (st) st.innerHTML = '<span style="color:#92400E;">Salvo com aviso: ' + resp.erro + '</span>';
+        console.warn('[Sheets] salvo com aviso:', resp.erro, resp.relatorio);
+      } else if (resp && resp.ok) {
         if (st) st.innerHTML = 'Dados salvos na planilha!';
       } else {
         if (st) st.innerHTML = 'Erro ao salvar: ' + (resp && resp.erro ? resp.erro : 'resposta inesperada');
@@ -9536,6 +9549,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Estado</label>
             <input id="orc_pen_estado" type="text" placeholder="SP" style="width:100%;padding:0.55rem 0.7rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;font-size:0.88rem;box-sizing:border-box;">
+          </div>
+          <div id="orc_pen_pais_wrap" style="display:none;">
+            <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">País</label>
+            <input id="orc_pen_pais" type="text" placeholder="México" style="width:100%;padding:0.55rem 0.7rem;border:1.5px solid #E2E8F0;border-radius:6px;font-family:inherit;font-size:0.88rem;box-sizing:border-box;">
           </div>
           <div>
             <label style="display:block;font-size:0.72rem;font-weight:700;color:#6B7B8D;text-transform:uppercase;margin-bottom:0.3rem;">Atenção (Contato)</label>
@@ -10129,7 +10146,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       aba: (data.lang && data.lang !== 'PT') ? 'BD_EXPORT' : 'BD_PROP',
       nrProposta: data.numero || '', origem: data.origem || '', dataAbertura: data.data || '', mes: mes,
       representante: rep, interno: data.interno || '', responsavel: rep, nomeCliente: data.cliente || '',
-      cidade: data.cidade || '', uf: data.estado || '', eCliente: data.eCliente || '', tipoMercado: data.tipoMercado || '',
+      cidade: data.cidade || '', uf: data.estado || '', pais: (document.getElementById('orc_pen_pais') || {}).value || '', eCliente: data.eCliente || '', tipoMercado: data.tipoMercado || '',
       classificacao: data.classificacao || '',
       modelo: (data.modelo_crm || (data.itens.length > 0 ? data.itens[0].descricao : '')).substring(0, 100),
       versao: data.versao_crm || '', descricao: descricao.substring(0, 500),
@@ -10139,7 +10156,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (st) st.innerHTML = 'Enviando dados para a planilha...';
     var b64 = btoa(unescape(encodeURIComponent(payload)));
     window._gasJsonp('save', { d: b64 }, function(resp) {
-      if (resp && resp.ok) {
+      if (resp && resp.ok && resp.erro) {
+        if (st) st.innerHTML = '<span style="color:#92400E;">Salvo com aviso: ' + resp.erro + '</span>';
+        console.warn('[Sheets] salvo com aviso:', resp.erro, resp.relatorio);
+      } else if (resp && resp.ok) {
         if (st) st.innerHTML = 'Dados salvos na planilha!';
       } else {
         if (st) st.innerHTML = 'Erro ao salvar: ' + (resp && resp.erro ? resp.erro : 'resposta inesperada');
@@ -10810,6 +10830,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       nomeCliente:     data.cliente||'',
       cidade:          data.cidade||'',
       uf:              data.estado||'',
+      pais:            gvM('orc_maq_pais'),
       eCliente:        gvM('orc_maq_ecliente'),
       tipoMercado:     gvM('orc_maq_tipomercado'),
       classificacao:   gvM('orc_maq_classificacao'),
@@ -10823,7 +10844,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var stEl = document.getElementById('orc_maq_sheets_status');
     if (stEl) stEl.innerHTML = 'Enviando dados...';
     var b64 = btoa(unescape(encodeURIComponent(payload)));
-    window._gasJsonp('save', { d: b64 }, function(resp) { if (stEl) stEl.innerHTML = (resp && resp.ok) ? '&#10003; Salvo no Sheets!' : 'Erro Sheets'; }, function() { if (stEl) stEl.innerHTML = 'Falha ao enviar'; });
+    window._gasJsonp('save', { d: b64 }, function(resp) {
+      if (resp && resp.ok && resp.erro) { if (stEl) stEl.innerHTML = '<span style="color:#92400E;">Salvo com aviso: ' + resp.erro + '</span>'; console.warn('[Sheets] salvo com aviso:', resp.erro, resp.relatorio); }
+      else if (resp && resp.ok) { if (stEl) stEl.innerHTML = '&#10003; Salvo no Sheets!'; }
+      else { if (stEl) stEl.innerHTML = 'Erro Sheets'; }
+    }, function() { if (stEl) stEl.innerHTML = 'Falha ao enviar'; });
   }
 
   window.gerarOrcamentoMaquinasDocx = function(formato) {
@@ -12229,6 +12254,10 @@ document.addEventListener('DOMContentLoaded', measureWebVitals);
             <div style="font-size:0.68rem;color:#94A3B8;margin-bottom:2px;">UF</div>
             <input id="orc_maq_estado" type="text" maxlength="2" placeholder="RS" style="width:100%;padding:0.35rem 0.4rem;border:1.5px solid #E2E8F0;border-radius:5px;font-size:0.8rem;box-sizing:border-box;text-transform:uppercase;" onfocus="this.style.borderColor='#93C5FD'" onblur="this.style.borderColor='#E2E8F0'">
           </div>
+          <div id="orc_maq_pais_wrap" style="flex:2;display:none;">
+            <div style="font-size:0.68rem;color:#94A3B8;margin-bottom:2px;">País</div>
+            <input id="orc_maq_pais" type="text" placeholder="México" style="width:100%;padding:0.35rem 0.4rem;border:1.5px solid #E2E8F0;border-radius:5px;font-size:0.8rem;box-sizing:border-box;" onfocus="this.style.borderColor='#93C5FD'" onblur="this.style.borderColor='#E2E8F0'">
+          </div>
         </div>
         <div style="margin-bottom:0.35rem;">
           <div style="font-size:0.68rem;color:#94A3B8;margin-bottom:2px;">A/C (Aten&#231;&#227;o)</div>
@@ -13046,7 +13075,7 @@ function _carregarProposta(idOrSnap) {
 
 <!-- ===== MODAL EDITOR DE DESCRIÇÃO TÉCNICA ===== -->
 <div id="descritivoEditorModal" style="display:none;position:fixed;inset:0;z-index:20001;background:rgba(15,23,42,0.62);align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:12px;width:min(700px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 16px 56px rgba(0,0,0,0.3);">
+  <div style="background:white;border-radius:12px;width:min(1100px,96vw);height:88vh;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 16px 56px rgba(0,0,0,0.3);">
     <!-- Header -->
     <div style="padding:0.85rem 1.2rem;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;background:#1E3A5F;border-radius:12px 12px 0 0;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:0.6rem;color:white;">
@@ -13103,8 +13132,9 @@ function _carregarProposta(idOrSnap) {
     </div>
     <!-- Editor area -->
     <div id="descEditor" contenteditable="true" spellcheck="false"
-      style="flex:1;padding:1rem 1.25rem;min-height:220px;max-height:46vh;overflow-y:auto;font-size:0.875rem;line-height:1.72;color:#1E293B;outline:none;font-family:inherit;word-break:break-word;"
-      onkeydown="if(event.key==='Tab'){event.preventDefault();document.execCommand('insertHTML',false,'&emsp;');}">
+      style="flex:1;padding:1rem 1.25rem;min-height:220px;overflow-y:auto;font-size:0.875rem;line-height:1.72;color:#1E293B;outline:none;font-family:inherit;word-break:break-word;"
+      onkeydown="if(event.key==='Tab'){event.preventDefault();document.execCommand('insertHTML',false,'&emsp;');}"
+      onpaste="window._descEditorPaste(event)">
     </div>
     <!-- Footer -->
     <div style="padding:0.7rem 1.2rem;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:0.5rem;flex-shrink:0;background:#FAFAFA;border-radius:0 0 12px 12px;">
@@ -13162,6 +13192,77 @@ function _refreshDescritivoPreview() {
     box.style.fontStyle = '';
   }
 }
+
+// Limpa o HTML colado (Word gera lixo: mso-*, fontes, cores, margens) mantendo
+// só negrito/itálico/sublinhado e quebras de parágrafo — que é o que
+// _mkMaqItemRow/smartJoinLines (geração do orçamento) sabem interpretar.
+// Listas <ul>/<ol> viram linhas "- texto" / "1. texto", que é o formato que
+// smartJoinLines já reconhece como início de um novo parágrafo.
+function _sanitizePastedHtml(html) {
+  var container = document.createElement('div');
+  container.innerHTML = html;
+
+  Array.prototype.forEach.call(container.querySelectorAll('ul, ol'), function(list) {
+    var ordered = list.tagName === 'OL';
+    var n = 0;
+    var frag = document.createDocumentFragment();
+    Array.prototype.forEach.call(list.querySelectorAll(':scope > li'), function(li) {
+      n++;
+      var div = document.createElement('div');
+      div.appendChild(document.createTextNode(ordered ? (n + '. ') : '- '));
+      while (li.firstChild) div.appendChild(li.firstChild);
+      frag.appendChild(div);
+    });
+    list.parentNode.replaceChild(frag, list);
+  });
+
+  var allowedTags = { P: 1, DIV: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1 };
+
+  function clean(node) {
+    Array.prototype.slice.call(node.childNodes).forEach(function(child) {
+      if (child.nodeType === 3) return;
+      if (child.nodeType !== 1) { node.removeChild(child); return; }
+      var tag = child.tagName;
+      var style = child.getAttribute('style') || '';
+      var isBold = /font-weight\s*:\s*(bold|[7-9]\d\d)/i.test(style) || tag === 'B' || tag === 'STRONG';
+      var isItalic = /font-style\s*:\s*italic/i.test(style) || tag === 'I' || tag === 'EM';
+      var isUnderline = /text-decoration[^;"]*underline/i.test(style) || tag === 'U';
+
+      clean(child);
+
+      if (allowedTags[tag]) {
+        while (child.attributes.length) child.removeAttribute(child.attributes[0].name);
+        return;
+      }
+      var frag = document.createDocumentFragment();
+      while (child.firstChild) frag.appendChild(child.firstChild);
+      if (isUnderline) { var u = document.createElement('u'); u.appendChild(frag); frag = document.createDocumentFragment(); frag.appendChild(u); }
+      if (isItalic)    { var i = document.createElement('i'); i.appendChild(frag); frag = document.createDocumentFragment(); frag.appendChild(i); }
+      if (isBold)      { var b = document.createElement('b'); b.appendChild(frag); frag = document.createDocumentFragment(); frag.appendChild(b); }
+      node.replaceChild(frag, child);
+    });
+  }
+  clean(container);
+
+  return container.innerHTML
+    .replace(/<p>(&nbsp;|\s)*<\/p>/gi, '<br>')
+    .replace(/(<br>\s*){3,}/gi, '<br><br>');
+}
+
+window._descEditorPaste = function(e) {
+  e.preventDefault();
+  var cd = e.clipboardData || window.clipboardData;
+  var html = cd ? cd.getData('text/html') : '';
+  if (html) {
+    document.execCommand('insertHTML', false, _sanitizePastedHtml(html));
+  } else {
+    var text = (cd ? cd.getData('text/plain') : '') || '';
+    var asHtml = text.split(/\r\n|\r|\n/).map(function(l) {
+      return '<div>' + l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+    }).join('');
+    document.execCommand('insertHTML', false, asHtml);
+  }
+};
 
 function openDescritivoEditor() {
   var modal = document.getElementById('descritivoEditorModal');
