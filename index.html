@@ -13202,6 +13202,13 @@ function _sanitizePastedHtml(html) {
   var container = document.createElement('div');
   container.innerHTML = html;
 
+  // Remove por completo blocos que não são conteúdo visível (o Word sempre
+  // manda um <style> cheio de @font-face/@page — se apenas "desembrulhado"
+  // como qualquer outra tag, o texto bruto do CSS aparece na tela).
+  Array.prototype.forEach.call(container.querySelectorAll('style, script, meta, link, title, head, xml'), function(el) {
+    el.parentNode.removeChild(el);
+  });
+
   Array.prototype.forEach.call(container.querySelectorAll('ul, ol'), function(list) {
     var ordered = list.tagName === 'OL';
     var n = 0;
