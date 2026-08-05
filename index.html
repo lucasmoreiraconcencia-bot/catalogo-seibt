@@ -11119,6 +11119,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       if (!table) return '';
       var rows = Array.prototype.slice.call(table.querySelectorAll('tr'));
       if (!rows.length) return '';
+      // Tabela de layout do Word (1 coluna) não vira quadro — volta a ser texto.
+      var maxCols = 0;
+      rows.forEach(function(tr) {
+        var n = tr.querySelectorAll('td, th').length;
+        if (n > maxCols) maxCols = n;
+      });
+      if (maxCols < 2) return '';
       var bdr = 'w:val="single" w:sz="4" w:space="0" w:color="auto"';
       var tblBdr = '<w:tblBorders><w:top ' + bdr + '/><w:left ' + bdr + '/><w:bottom ' + bdr + '/><w:right ' + bdr + '/><w:insideH ' + bdr + '/><w:insideV ' + bdr + '/></w:tblBorders>';
       var rpr18  = '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>';
@@ -11155,7 +11162,21 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     function splitDescPorTabelas(html) {
       return String(html || '').split(/(<table[\s\S]*?<\/table>)/i).filter(function(s) { return s && s.trim(); });
     }
-    function temTabelaHtml(html) { return /<table[\s\S]*?<\/table>/i.test(String(html || '')); }
+    // Só considera "tem tabela" quando existe uma tabela de dados (2+ colunas).
+    // Tabelas de layout do Word (1 coluna) não contam.
+    function temTabelaHtml(html) {
+      var m = String(html || '').match(/<table[\s\S]*?<\/table>/gi);
+      if (!m) return false;
+      for (var i = 0; i < m.length; i++) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = m[i];
+        var rows = tmp.querySelectorAll('tr');
+        for (var j = 0; j < rows.length; j++) {
+          if (rows[j].querySelectorAll('td, th').length >= 2) return true;
+        }
+      }
+      return false;
+    }
     // Substituição dinâmica da voltagem: troca padrões como "220 OU 380V" ou "220/380V"
     // pela voltagem efetivamente selecionada no painel lateral (orc_maq_voltagem).
     function applyVoltage(text) {
@@ -11241,10 +11262,11 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     if (item.descricao && temTabelaHtml(item.descricao)) {
       splitDescPorTabelas(item.descricao).forEach(function(bloco) {
         if (/^\s*<table/i.test(bloco)) {
-          cellContent += mkHtmlTableXml(bloco);
-        } else {
-          cellContent += smartJoinLines(stripHtml(bloco)).split('\n').map(renderDescLine).filter(Boolean).join('');
+          var xmlTabela = mkHtmlTableXml(bloco);
+          if (xmlTabela) { cellContent += xmlTabela; return; }
+          // Tabela de layout (1 coluna) — cai para o tratamento de texto abaixo.
         }
+        cellContent += smartJoinLines(stripHtml(bloco)).split('\n').map(renderDescLine).filter(Boolean).join('');
       });
       var trComTabela = '<w:tr>';
       trComTabela += '<w:tc><w:tcPr><w:tcW w:w="675" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:before="240" w:after="0"/><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>' + itemNum + '</w:t></w:r></w:p></w:tc>';
@@ -13285,6 +13307,35 @@ function _refreshDescritivoPreview() {
 // _mkMaqItemRow/smartJoinLines (geração do orçamento) sabem interpretar.
 // Listas <ul>/<ol> viram linhas "- texto" / "1. texto", que é o formato que
 // smartJoinLines já reconhece como início de um novo parágrafo.
+// O Word envolve o conteúdo copiado de dentro de uma célula em tabelas de
+// layout de 1 coluna. Elas não são quadros de verdade — se ficarem, o texto
+// aparece dentro de uma caixa azul centralizada. Aqui viram texto normal.
+// A tabela real (Especificações Técnicas, 2 colunas) é preservada.
+function _desembrulharTabelasLayout(root) {
+  var mudou = true, guarda = 0;
+  while (mudou && guarda++ < 10) {
+    mudou = false;
+    Array.prototype.forEach.call(root.querySelectorAll('table'), function(tb) {
+      if (!tb.parentNode) return;
+      var rows = Array.prototype.slice.call(tb.querySelectorAll('tr'));
+      var maxCols = 0;
+      rows.forEach(function(tr) {
+        var n = tr.querySelectorAll('td, th').length;
+        if (n > maxCols) maxCols = n;
+      });
+      if (maxCols > 1) return;
+      var frag = document.createDocumentFragment();
+      rows.forEach(function(tr) {
+        Array.prototype.forEach.call(tr.querySelectorAll('td, th'), function(cell) {
+          while (cell.firstChild) frag.appendChild(cell.firstChild);
+        });
+      });
+      tb.parentNode.replaceChild(frag, tb);
+      mudou = true;
+    });
+  }
+}
+
 function _sanitizePastedHtml(html) {
   var container = document.createElement('div');
   container.innerHTML = html;
@@ -13295,6 +13346,8 @@ function _sanitizePastedHtml(html) {
   Array.prototype.forEach.call(container.querySelectorAll('style, script, meta, link, title, head, xml'), function(el) {
     el.parentNode.removeChild(el);
   });
+
+  _desembrulharTabelasLayout(container);
 
   Array.prototype.forEach.call(container.querySelectorAll('ul, ol'), function(list) {
     var ordered = list.tagName === 'OL';
@@ -13371,6 +13424,9 @@ function openDescritivoEditor() {
   var ta = document.getElementById(_descTextareaId(window._currentDescVolt));
   var stored = (ta && ta.value) || '';
   editor.innerHTML = stored;
+  // Normaliza descrições já salvas antes desta correção (tabelas de layout
+  // do Word viravam caixas azuis centralizadas).
+  _desembrulharTabelasLayout(editor);
   modal.style.display = 'flex';
   setTimeout(function() {
     editor.focus();
