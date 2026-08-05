@@ -11109,6 +11109,53 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       t += '<w:p><w:pPr><w:pStyle w:val="SemEspaamento"/></w:pPr></w:p>';
       return t;
     }
+    // Converte uma tabela HTML colada do Word (que ficou guardada dentro da
+    // Descrição Técnica) na mesma tabela Word usada por mkSpecsTable —
+    // bordas finas, cabeçalho azul, valor alinhado à direita.
+    function mkHtmlTableXml(tblHtml) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = tblHtml;
+      var table = tmp.querySelector('table');
+      if (!table) return '';
+      var rows = Array.prototype.slice.call(table.querySelectorAll('tr'));
+      if (!rows.length) return '';
+      var bdr = 'w:val="single" w:sz="4" w:space="0" w:color="auto"';
+      var tblBdr = '<w:tblBorders><w:top ' + bdr + '/><w:left ' + bdr + '/><w:bottom ' + bdr + '/><w:right ' + bdr + '/><w:insideH ' + bdr + '/><w:insideV ' + bdr + '/></w:tblBorders>';
+      var rpr18  = '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>';
+      var rpr18B = '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>';
+      var colAttr = 3700, colVal = 1600, tblTotal = colAttr + colVal;
+      var t = '<w:tbl><w:tblPr><w:tblW w:w="' + tblTotal + '" w:type="dxa"/>' + tblBdr + '</w:tblPr>';
+      t += '<w:tblGrid><w:gridCol w:w="' + colAttr + '"/><w:gridCol w:w="' + colVal + '"/></w:tblGrid>';
+      rows.forEach(function(tr, ri) {
+        var cells = Array.prototype.slice.call(tr.querySelectorAll('td, th'));
+        if (!cells.length) return;
+        var txts = cells.map(function(c) { return (c.textContent || '').replace(/\s+/g, ' ').trim(); });
+        // Linha de cabeçalho: uma célula só (ou colspan) → mescla as 2 colunas,
+        // fundo azul, negrito e centralizada.
+        if (cells.length === 1) {
+          t += '<w:tr><w:tc><w:tcPr><w:tcW w:w="' + tblTotal + '" w:type="dxa"/><w:gridSpan w:val="2"/><w:shd w:val="clear" w:color="auto" w:fill="DBE5F1"/></w:tcPr>';
+          t += '<w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="center"/>' + rpr18B + '</w:pPr><w:r>' + rpr18B + '<w:t xml:space="preserve">' + escXml(txts[0]) + '</w:t></w:r></w:p></w:tc></w:tr>';
+          return;
+        }
+        var ehCabecalho = (ri === 0);
+        var rprL = ehCabecalho ? rpr18B : rpr18;
+        var shd  = ehCabecalho ? '<w:shd w:val="clear" w:color="auto" w:fill="DBE5F1"/>' : '';
+        t += '<w:tr>';
+        t += '<w:tc><w:tcPr><w:tcW w:w="' + colAttr + '" w:type="dxa"/><w:noWrap/>' + shd + '</w:tcPr>';
+        t += '<w:p><w:pPr><w:spacing w:after="0"/>' + rprL + '</w:pPr><w:r>' + rprL + '<w:t xml:space="preserve">' + escXml(txts[0]) + '</w:t></w:r></w:p></w:tc>';
+        t += '<w:tc><w:tcPr><w:tcW w:w="' + colVal + '" w:type="dxa"/><w:noWrap/>' + shd + '</w:tcPr>';
+        t += '<w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="right"/>' + rprL + '</w:pPr><w:r>' + rprL + '<w:t xml:space="preserve">' + escXml(txts.slice(1).join(' ')) + '</w:t></w:r></w:p></w:tc>';
+        t += '</w:tr>';
+      });
+      t += '</w:tbl>';
+      t += '<w:p><w:pPr><w:pStyle w:val="SemEspaamento"/></w:pPr></w:p>';
+      return t;
+    }
+    // Separa a descrição em blocos de texto e blocos de tabela, preservando a ordem.
+    function splitDescPorTabelas(html) {
+      return String(html || '').split(/(<table[\s\S]*?<\/table>)/i).filter(function(s) { return s && s.trim(); });
+    }
+    function temTabelaHtml(html) { return /<table[\s\S]*?<\/table>/i.test(String(html || '')); }
     // Substituição dinâmica da voltagem: troca padrões como "220 OU 380V" ou "220/380V"
     // pela voltagem efetivamente selecionada no painel lateral (orc_maq_voltagem).
     function applyVoltage(text) {
@@ -11125,7 +11172,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     // para evitar duplicação. O renderDescLine então renderiza essa primeira linha com sz=20 (formato de título).
     var firstLineIsTitle = false;
     if (item.descricao) {
-      var _preLines = smartJoinLines(stripHtml(item.descricao)).split('\n');
+      // Ignora tabelas nesta detecção — só interessa a 1ª linha de texto.
+      var _preLines = smartJoinLines(stripHtml(String(item.descricao).replace(/<table[\s\S]*?<\/table>/gi, ''))).split('\n');
       for (var _pi = 0; _pi < _preLines.length; _pi++) {
         var _pl = _preLines[_pi].trim();
         if (!_pl) continue;
@@ -11187,6 +11235,27 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       return '<w:p><w:pPr><w:pStyle w:val="SemEspaamento"/><w:spacing w:line="276" w:lineRule="auto"/>' + rprBody + '</w:pPr><w:r>' + rprBody + '<w:t xml:space="preserve">' + escXml(line) + '</w:t></w:r></w:p>';
     }
     var cellContent = titulo;
+    // Caso a descrição traga a(s) tabela(s) coladas do Word: renderiza os blocos
+    // na ordem em que aparecem (texto → tabela → texto). Nesse caso a tabela de
+    // specs automática não é inserida, para não duplicar o quadro.
+    if (item.descricao && temTabelaHtml(item.descricao)) {
+      splitDescPorTabelas(item.descricao).forEach(function(bloco) {
+        if (/^\s*<table/i.test(bloco)) {
+          cellContent += mkHtmlTableXml(bloco);
+        } else {
+          cellContent += smartJoinLines(stripHtml(bloco)).split('\n').map(renderDescLine).filter(Boolean).join('');
+        }
+      });
+      var trComTabela = '<w:tr>';
+      trComTabela += '<w:tc><w:tcPr><w:tcW w:w="675" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:before="240" w:after="0"/><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>' + itemNum + '</w:t></w:r></w:p></w:tc>';
+      trComTabela += '<w:tc><w:tcPr><w:tcW w:w="6946" w:type="dxa"/></w:tcPr>' + cellContent + '</w:tc>';
+      trComTabela += '<w:tc><w:tcPr><w:tcW w:w="567" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>' + qtd + '</w:t></w:r></w:p></w:tc>';
+      trComTabela += '<w:tc><w:tcPr><w:tcW w:w="1276" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>' + vUnitFmt + '</w:t></w:r></w:p></w:tc>';
+      trComTabela += '<w:tc><w:tcPr><w:tcW w:w="567" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="center"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>' + ipiStr + '</w:t></w:r></w:p></w:tc>';
+      trComTabela += '<w:tc><w:tcPr><w:tcW w:w="1343" w:type="dxa"/></w:tcPr><w:p><w:pPr><w:spacing w:after="0"/><w:jc w:val="right"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:b/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:t>' + totalFmt + '</w:t></w:r></w:p></w:tc>';
+      trComTabela += '</w:tr>';
+      return trComTabela;
+    }
     if (item.descricao) {
       var cleanDesc = smartJoinLines(stripHtml(item.descricao));
       var descLines = cleanDesc.split('\n');
@@ -13074,6 +13143,24 @@ function _carregarProposta(idOrSnap) {
 </script>
 
 <!-- ===== MODAL EDITOR DE DESCRIÇÃO TÉCNICA ===== -->
+<style>
+/* Tabelas coladas do Word dentro do editor de Descrição Técnica —
+   exibidas com bordas, igual ao quadro "Especificações Técnicas" das
+   propostas. O mesmo visual é reproduzido no .docx gerado. */
+#descEditor table, #descPreviewContent table {
+  border-collapse: collapse; margin: 0.5rem 0; width: auto; max-width: 100%;
+}
+#descEditor table td, #descEditor table th,
+#descPreviewContent table td, #descPreviewContent table th {
+  border: 1px solid #94A3B8; padding: 3px 8px; font-size: 0.84rem; vertical-align: middle;
+}
+#descEditor table tr:first-child td, #descEditor table tr:first-child th,
+#descPreviewContent table tr:first-child td, #descPreviewContent table tr:first-child th {
+  background: #DBE5F1; font-weight: 700; text-align: center;
+}
+#descEditor table td:last-child:not(:first-child),
+#descPreviewContent table td:last-child:not(:first-child) { text-align: right; }
+</style>
 <div id="descritivoEditorModal" style="display:none;position:fixed;inset:0;z-index:20001;background:rgba(15,23,42,0.62);align-items:center;justify-content:center;">
   <div style="background:white;border-radius:12px;width:min(1100px,96vw);height:88vh;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 16px 56px rgba(0,0,0,0.3);">
     <!-- Header -->
@@ -13223,7 +13310,11 @@ function _sanitizePastedHtml(html) {
     list.parentNode.replaceChild(frag, list);
   });
 
-  var allowedTags = { P: 1, DIV: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1 };
+  // Tabelas são preservadas (é assim que o quadro "Especificações Técnicas"
+  // do Word continua sendo um quadro, tanto no editor quanto no orçamento).
+  var allowedTags = { P: 1, DIV: 1, BR: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1,
+                      TABLE: 1, THEAD: 1, TBODY: 1, TFOOT: 1, TR: 1, TD: 1, TH: 1 };
+  var keepAttrs = { colspan: 1, rowspan: 1 };
 
   function clean(node) {
     Array.prototype.slice.call(node.childNodes).forEach(function(child) {
@@ -13238,7 +13329,9 @@ function _sanitizePastedHtml(html) {
       clean(child);
 
       if (allowedTags[tag]) {
-        while (child.attributes.length) child.removeAttribute(child.attributes[0].name);
+        Array.prototype.slice.call(child.attributes).forEach(function(a) {
+          if (!keepAttrs[a.name.toLowerCase()]) child.removeAttribute(a.name);
+        });
         return;
       }
       var frag = document.createDocumentFragment();
@@ -13256,44 +13349,12 @@ function _sanitizePastedHtml(html) {
     .replace(/(<br>\s*){3,}/gi, '<br><br>');
 }
 
-// Detecta a tabela "Especificações Técnicas" (característica | valor) dentro
-// do HTML colado do Word e preenche automaticamente o editor de
-// Especificações Técnicas do formulário (TEMP_SPECS_DATA). É esse editor —
-// não o texto colado — que a geração do orçamento usa para desenhar a
-// tabela com bordas igual ao Word (função mkSpecsTable). A tabela é então
-// removida do texto colado para não aparecer duplicada como texto solto.
-function _extrairEspecificacoesTecnicas(container) {
-  var achouAlguma = false;
-  Array.prototype.forEach.call(container.querySelectorAll('table'), function(table) {
-    var rows = Array.prototype.slice.call(table.querySelectorAll('tr'));
-    if (!rows.length || !/^especifica/i.test((rows[0].textContent || '').trim())) return;
-    var achouNestaTabela = false;
-    for (var i = 1; i < rows.length; i++) {
-      var cells = rows[i].querySelectorAll('td, th');
-      if (cells.length < 2) continue;
-      var chave = (cells[0].textContent || '').replace(/\s+/g, ' ').trim();
-      var valor = (cells[1].textContent || '').replace(/\s+/g, ' ').trim();
-      if (!chave) continue;
-      TEMP_SPECS_DATA[chave] = valor;
-      achouNestaTabela = true;
-    }
-    if (achouNestaTabela) { achouAlguma = true; table.parentNode.removeChild(table); }
-  });
-  if (achouAlguma) {
-    if (typeof renderSpecsEditor === 'function') renderSpecsEditor();
-    if (typeof showToast === 'function') showToast('Especificações Técnicas preenchidas automaticamente a partir da tabela colada', 'success');
-  }
-}
-
 window._descEditorPaste = function(e) {
   e.preventDefault();
   var cd = e.clipboardData || window.clipboardData;
   var html = cd ? cd.getData('text/html') : '';
   if (html) {
-    var pre = document.createElement('div');
-    pre.innerHTML = html;
-    _extrairEspecificacoesTecnicas(pre);
-    document.execCommand('insertHTML', false, _sanitizePastedHtml(pre.innerHTML));
+    document.execCommand('insertHTML', false, _sanitizePastedHtml(html));
   } else {
     var text = (cd ? cd.getData('text/plain') : '') || '';
     var asHtml = text.split(/\r\n|\r|\n/).map(function(l) {
