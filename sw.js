@@ -1,4 +1,16 @@
-const CACHE_NAME = 'seibt-catalogo-v5';
+const CACHE_NAME = 'seibt-catalogo-v6'; // Incrementado para forçar atualização do SW
+
+// Limitar tamanho do cache de imagens para evitar quota overflow (#15)
+function trimCache(cacheName, maxItems) {
+  caches.open(cacheName).then(cache => {
+    cache.keys().then(keys => {
+      if (keys.length > maxItems) {
+        // Remove a entrada mais antiga (FIFO)
+        cache.delete(keys[0]).then(() => trimCache(cacheName, maxItems));
+      }
+    });
+  });
+}
 const ASSETS = [
   './manifest.json',
   './icon-192.png',
@@ -28,6 +40,13 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
+  // Google Apps Script e APIs externas — NUNCA interceptar (causa CORS)
+  if (url.hostname.includes('script.google.com') ||
+      url.hostname.includes('script.googleusercontent.com') ||
+      url.hostname.includes('googleapis.com')) {
+    return; // browser lida diretamente, sem service worker
+  }
+
   // index.html / navegação / raiz: SEMPRE buscar da rede (sem cache)
   if (event.request.mode === 'navigate' ||
       url.pathname === '/' ||
@@ -47,7 +66,10 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE_NAME).then(cache =>
         fetch(event.request)
           .then(response => {
-            if (response.ok) cache.put(event.request, response.clone());
+            if (response.ok) {
+              cache.put(event.request, response.clone());
+              trimCache(CACHE_NAME, 120); // Limite de 120 imagens em cache (#15)
+            }
             return response;
           })
           .catch(() => cache.match(event.request))
